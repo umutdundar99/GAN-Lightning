@@ -1,0 +1,36 @@
+dataset:
+  name: MNIST
+  root: data/
+  num_workers: 2
+  normalize: true
+  download: true
+  shuffle: true
+  train: true
+  pin_memory: true
+
+training_params:
+  n_epochs: 200
+  display_step: 500
+  batch_size: 128
+  device: [0]
+  accelerator: gpu
+  model:
+    z_dim: 100
+    architecture: SimpleGAN
+    input_size: 28 # set it to 28 for mnist and 32 for cifar10
+    pretrained: false
+  loss:
+    disriminator_loss: BasicDiscLoss
+    generator_loss: BasicGenLoss
+  optimizer:
+    name: adam
+    lr: 0.0001
+    scheduler:
+      name: StepLR
+      step_size: 50
+      gamma: 0.5
+  logger:
+    tool: mlflow
+    experiment_name: gan
+    run_name: basic-gan
+    tracking_uri: localhost:5000
