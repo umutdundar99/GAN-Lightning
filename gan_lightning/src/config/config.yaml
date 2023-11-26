@@ -9,7 +9,7 @@ dataset:
   pin_memory: true
 
 training_params:
-  n_epochs: 200
+  n_epochs: 150
   display_step: 500
   batch_size: 128
   device_num: [0]

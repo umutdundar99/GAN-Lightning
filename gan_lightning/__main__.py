@@ -46,6 +46,12 @@ def GAN_Lightning(config: DictConfig):
 
     trainer.fit(model, dataloader)
 
+    # get inference
+    model = model.eval()
+    noise = model.create_noise(1, model.z_dim, device=model.device[0])
+    generated_img = model(noise)
+    generated_img = generated_img.view(28, 28).detach().cpu().numpy()
+
     return model
 
 
