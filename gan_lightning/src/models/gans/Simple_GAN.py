@@ -3,7 +3,9 @@ import cv2
 import os
 from typing import Dict, Any
 from pytorch_lightning import LightningModule
-from gan_lightning.src.models.discriminator.simple_discriminator import Simple_Discriminator
+from gan_lightning.src.models.discriminator.simple_discriminator import (
+    Simple_Discriminator,
+)
 from gan_lightning.src.models.generator.simple_generator import Simple_Generator
 from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
 from gan_lightning.utils.noise import create_noise
@@ -21,7 +23,9 @@ class SimpleGAN(LightningModule):
 
         self.set_attributes(config)
         self.discriminator_loss = losses.get("discriminator_loss", None)
-        self.d_loss = self.discriminator_loss(self.G, self.D, self.z_dim, self.device_num)
+        self.d_loss = self.discriminator_loss(
+            self.G, self.D, self.z_dim, self.device_num
+        )
         self.generator_loss = losses.get("generator_loss", None)
         self.g_loss = self.generator_loss(self.G, self.D, self.z_dim, self.device_num)
         self.automatic_optimization = False
