@@ -15,4 +15,3 @@ transformers>=4.21.3
 onnx>=1.13.0
 onnxsim>=0.4.10
 onnxruntime>=1.13.1
-checksumdir==1.2.0
