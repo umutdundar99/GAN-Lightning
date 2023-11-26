@@ -10,7 +10,7 @@ from gan_lightning.src.models import model_registration
 
 @model_registration("Simple_Discriminator")
 class Simple_Discriminator(pl.LightningModule):
-    def __init__(self, img_channel: int = 1, hidden_dim=16, **kwargs):
+    def __init__(self, img_channel: int = 784, hidden_dim=128, **kwargs):
         super().__init__()
         self.kwargs = kwargs
         self.discriminator = nn.Sequential(
