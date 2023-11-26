@@ -11,7 +11,12 @@ def get_model(config, loss, **kwargs):
     model_architecture = config["model"]["architecture"]
     model = registered_models[model_architecture]
 
-    return model(config=extract_model_params(config), losses=loss, optimizer_dict=config["optimizer"], **kwargs)
+    return model(
+        config=extract_model_params(config),
+        losses=loss,
+        optimizer_dict=config["optimizer"],
+        **kwargs
+    )
 
 
 def extract_model_params(config: Dict, output_dict: Dict = {}):

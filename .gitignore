@@ -5,3 +5,16 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+__pycache__/
+outputs/
+MNIST/
+generated_images/
+checkpoints
+model.ckpt
+model.pth
+black.toml
+requirements.txt
+imgs
+.vscode
+
+```
