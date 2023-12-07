@@ -1,7 +1,7 @@
 dataset:
   name: MNIST
   root: data/
-  num_workers: 6
+  num_workers: 12
   normalize: true
   download: true
   shuffle: true
@@ -9,22 +9,22 @@ dataset:
   pin_memory: true
 
 training_params:
-  n_epochs: 150
+  n_epochs: 200
   display_step: 500
   batch_size: 128
   device_num: [0]
   accelerator: gpu
   model:
-    z_dim: 100
-    architecture: SimpleGAN
+    z_dim: 64
+    architecture: DeepConvGAN
     input_size: 28 # set it to 28 for mnist and 32 for cifar10
     pretrained: false
   loss:
-    discriminator_loss: BasicDiscLoss
-    generator_loss: BasicGenLoss
+    discriminator_loss: BCEWithLogitsLoss
+    generator_loss: BCEWithLogitsLoss
   optimizer:
     optimizer_name: adam
-    lr: 0.0001
+    lr: 0.0002
     scheduler:
       scheduler_name: StepLR
       step_size: 50
