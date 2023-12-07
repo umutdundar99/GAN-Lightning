@@ -32,7 +32,7 @@ Run the gan_lightning python module.
 
 ## 1- MNIST DATASET
 
-### 1.1 SimpleGAn
+### 1.1 SimpleGAN
   SimpleGAN consists of a SimpleGenerator and SimpleDiscriminator which contain linear layers.
 
   ![generated_images](https://github.com/umutdundar99/GAN-Lightning/assets/77459948/f363074b-4520-43da-8f3c-8dd0bb396955)

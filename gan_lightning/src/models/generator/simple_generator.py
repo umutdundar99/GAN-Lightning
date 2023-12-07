@@ -12,8 +12,6 @@ from gan_lightning.src.models import model_registration
 class Simple_Generator(pl.LightningModule):
     def __init__(self, z_dim=100, img_channel=784, hidden_dim=128, **kwargs):
         super().__init__()
-        self.kwargs = kwargs
-        self.generator_loss = kwargs.get("loss", None)
         self.generator = torch.nn.Sequential(
             simple_1d_generator_block(z_dim, hidden_dim),
             simple_1d_generator_block(hidden_dim, hidden_dim * 2),
