@@ -29,8 +29,14 @@ def GAN_Lightning(config: DictConfig):
     model = get_model(config.training_params, loss)
 
     # TODO: Get it from a dataloader.py file
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,)),
+        ]
+    )
     dataloader = DataLoader(
-        MNIST(".", download=True, transform=transforms.ToTensor()),
+        MNIST(".", download=True, transform=transform),
         batch_size=config.training_params.batch_size,
         shuffle=True,
         num_workers=config.dataset.num_workers,
@@ -45,12 +51,6 @@ def GAN_Lightning(config: DictConfig):
     )
 
     trainer.fit(model, dataloader)
-
-    # get inference
-    model = model.eval()
-    noise = model.create_noise(1, model.z_dim, device=model.device[0])
-    generated_img = model(noise)
-    generated_img = generated_img.view(28, 28).detach().cpu().numpy()
 
     return model
 
