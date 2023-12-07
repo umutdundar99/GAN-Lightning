@@ -9,6 +9,7 @@ __pycache__/
 outputs/
 MNIST/
 generated_images/
+generated_images_simple/
 checkpoints
 model.ckpt
 model.pth
