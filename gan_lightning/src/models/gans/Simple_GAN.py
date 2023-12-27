@@ -15,7 +15,13 @@ from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 
 @model_registration("SimpleGAN")
 class SimpleGAN(LightningModule):
-    def __init__(self, config: None, losses: Dict[str, Any], optimizer_dict: Dict[str, Any], **kwargs):
+    def __init__(
+        self,
+        config: None,
+        losses: Dict[str, Any],
+        optimizer_dict: Dict[str, Any],
+        **kwargs,
+    ):
         super().__init__()
         self.G = Simple_Generator()
         self.D = Simple_Discriminator()
@@ -23,7 +29,9 @@ class SimpleGAN(LightningModule):
 
         self.set_attributes(config)
         self.discriminator_loss = losses.get("discriminator_loss", None)
-        self.d_loss = self.discriminator_loss(self.G, self.D, self.z_dim, self.device_num)
+        self.d_loss = self.discriminator_loss(
+            self.G, self.D, self.z_dim, self.device_num
+        )
         self.generator_loss = losses.get("generator_loss", None)
         self.g_loss = self.generator_loss(self.G, self.D, self.z_dim, self.device_num)
         self.automatic_optimization = False

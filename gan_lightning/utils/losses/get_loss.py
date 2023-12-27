@@ -1,5 +1,10 @@
 from torch.nn import BCEWithLogitsLoss as BCE
-from gan_lightning.utils.losses.losses import BasicGenLoss, BasicDiscLoss, WDiscLoss, WGenLoss
+from gan_lightning.utils.losses.losses import (
+    BasicGenLoss,
+    BasicDiscLoss,
+    WDiscLoss,
+    WGenLoss,
+)
 import omegaconf
 from omegaconf import OmegaConf
 

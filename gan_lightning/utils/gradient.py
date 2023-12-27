@@ -1,7 +1,13 @@
 import torch
 
-def compute_gradient_penalty(discriminator: torch.nn.Module, real_samples: torch.Tensor, fake_samples: torch.Tensor, alpha: torch.Tensor):
-    '''
+
+def compute_gradient_penalty(
+    discriminator: torch.nn.Module,
+    real_samples: torch.Tensor,
+    fake_samples: torch.Tensor,
+    alpha: torch.Tensor,
+):
+    """
     Calculate the penalty term for the gradient in Wasserstein GAN with Gradient Penalty (WGAN-GP).
 
     Args:
@@ -47,8 +53,8 @@ def compute_gradient_penalty(discriminator: torch.nn.Module, real_samples: torch
 
         6. Return Penalty Term:
             - Provide the computed gradient penalty term for use in the overall loss function during WGAN-GP training.
-    '''
-    
+    """
+
     mixed_images = (real_samples * alpha) + (fake_samples * (1 - alpha))
 
     mixed_scores = discriminator(mixed_images)
@@ -60,11 +66,11 @@ def compute_gradient_penalty(discriminator: torch.nn.Module, real_samples: torch
         create_graph=True,
         retain_graph=True,
     )[0]
-    
+
     gradient = gradient.view(gradient.shape[0], -1)
-    
-    # Penalizes deviations from the target norm of 1. 
+
+    # Penalizes deviations from the target norm of 1.
     # The model is encouraged to produce gradients with a norm close to 1 by minimizing this penalty term.
-    penalty_gradient = torch.mean((gradient.norm(2, dim=1) - 1)**2)
+    penalty_gradient = torch.mean((gradient.norm(2, dim=1) - 1) ** 2)
 
     return penalty_gradient
