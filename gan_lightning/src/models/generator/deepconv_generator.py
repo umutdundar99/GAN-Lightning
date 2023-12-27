@@ -15,11 +15,15 @@ class DeepConv_Generator(pl.LightningModule):
         self.z_dim = z_dim
         self.generator = torch.nn.Sequential(
             deepconv_generator_block(z_dim, hidden_dim * 4),
-            deepconv_generator_block(hidden_dim * 4, hidden_dim * 2, kernel_size=4, stride=1),
+            deepconv_generator_block(
+                hidden_dim * 4, hidden_dim * 2, kernel_size=4, stride=1
+            ),
             deepconv_generator_block(hidden_dim * 2, hidden_dim),
         )
 
-        self.final_block = deepconv_generator_block(hidden_dim, img_channel, kernel_size=4)
+        self.final_block = deepconv_generator_block(
+            hidden_dim, img_channel, kernel_size=4
+        )
 
     def forward(self, noise):
         x = noise.view(len(noise), self.z_dim, 1, 1)

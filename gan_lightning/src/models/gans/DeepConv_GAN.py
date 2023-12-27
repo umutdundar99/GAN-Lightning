@@ -3,7 +3,9 @@ import cv2
 import os
 from typing import Dict, Any, List
 from pytorch_lightning import LightningModule
-from gan_lightning.src.models.discriminator.deepconv_discriminator import DeepConv_Discriminator
+from gan_lightning.src.models.discriminator.deepconv_discriminator import (
+    DeepConv_Discriminator,
+)
 
 from gan_lightning.src.models.generator.deepconv_generator import DeepConv_Generator
 from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
@@ -14,7 +16,13 @@ from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 
 @model_registration("DeepConvGAN")
 class DeepConvGAN(LightningModule):
-    def __init__(self, config: None, losses: Dict[str, Any], optimizer_dict: Dict[str, Any], **kwargs):
+    def __init__(
+        self,
+        config: None,
+        losses: Dict[str, Any],
+        optimizer_dict: Dict[str, Any],
+        **kwargs,
+    ):
         super().__init__()
         self.G = DeepConv_Generator(z_dim=64).apply(self.weights_inits)
         self.D = DeepConv_Discriminator().apply(self.weights_inits)
@@ -76,8 +84,12 @@ class DeepConvGAN(LightningModule):
             )
 
     def configure_optimizers(self):
-        G_optimizer = get_optimizer(self.G.parameters(), self.optimizer_dict, betas=(0.5, 0.999))
-        D_Optimizer = get_optimizer(self.D.parameters(), self.optimizer_dict, betas=(0.5, 0.999))
+        G_optimizer = get_optimizer(
+            self.G.parameters(), self.optimizer_dict, betas=(0.5, 0.999)
+        )
+        D_Optimizer = get_optimizer(
+            self.D.parameters(), self.optimizer_dict, betas=(0.5, 0.999)
+        )
         return [G_optimizer[0], D_Optimizer[0]], [G_optimizer[1], D_Optimizer[1]]
 
     def set_attributes(self, config: Dict[str, Any]):

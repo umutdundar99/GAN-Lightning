@@ -1,10 +1,14 @@
 from torch.nn import BCEWithLogitsLoss as BCE
-from gan_lightning.utils.losses.losses import BasicGenLoss
-from gan_lightning.utils.losses.losses import BasicDiscLoss
+from gan_lightning.utils.losses.losses import (
+    BasicGenLoss,
+    BasicDiscLoss,
+    WDiscLoss,
+    WGenLoss,
+)
 import omegaconf
 from omegaconf import OmegaConf
 
-all_losses = [BCE, BasicGenLoss, BasicDiscLoss]
+all_losses = [BCE, BasicGenLoss, BasicDiscLoss, WDiscLoss, WGenLoss]
 
 
 def get_loss(loss_config: omegaconf.dictconfig.DictConfig):

@@ -62,3 +62,35 @@ class BasicDiscLoss(torch.nn.Module):
 
     def __name__(self):
         return "BasicDiscLoss"
+
+
+class WGenLoss(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, d_fake_prediction):
+        return -torch.mean(d_fake_prediction)
+
+    def __name__(self):
+        return "WGenLoss"
+
+
+class WDiscLoss(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(
+        self,
+        d_real_prediction,
+        d_fake_prediction,
+        penalty,
+        penalty_lambda: float = 10.0,
+    ):
+        return (
+            torch.mean(d_fake_prediction)
+            - torch.mean(d_real_prediction)
+            + penalty_lambda * penalty
+        )
+
+    def __name__(self):
+        return "WDiscLoss"
