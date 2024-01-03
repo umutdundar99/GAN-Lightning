@@ -1,17 +1,16 @@
 dataset:
   name: MNIST
-  root: data/
+  data_dir: data/
   num_workers: 12
   normalize: true
   download: true
   shuffle: true
   train: true
   pin_memory: true
-
+  batch_size: 128
 training_params:
   n_epochs: 200
   display_step: 500
-  batch_size: 128
   device_num: [0]
   accelerator: gpu
   model:
@@ -29,8 +28,10 @@ training_params:
       scheduler_name: StepLR
       step_size: 50
       gamma: 0.5
-  logger:
-    tool: mlflow
-    experiment_name: gan
-    run_name: basic-gan
-    tracking_uri: localhost:5000
+logger:
+  tool: mlflow
+  experiment_name: Wasserstein GAN
+  run_name: WGAN
+  tracking_uri: localhost:5000
+  tags: experimental
+  log_model: all
