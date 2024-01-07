@@ -12,7 +12,9 @@ from lightning.pytorch.loggers import MLFlowLogger
 @hydra.main(config_path="src/config", config_name="config", version_base=None)
 def GAN_Lightning(config: DictConfig):
     if config.training_params.accelerator == "gpu":
-        devices = CUDAAccelerator.parse_devices(config.training_params.device_num)
+        devices = CUDAAccelerator.parse_devices(
+            config.training_params.device_num
+        )  # noqa
         if len(devices) > 1:
             strategy = DDPStrategy(find_unused_parameters=False)
         else:

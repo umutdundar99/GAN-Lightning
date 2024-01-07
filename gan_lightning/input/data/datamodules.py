@@ -1,8 +1,9 @@
-from pytorch_lightning import LightningDataModule, LightningModule
+from pytorch_lightning import LightningDataModule
 from torchvision.datasets import MNIST
-import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, random_split
 from gan_lightning.input import register_dataset
+from gan_lightning.input.utils.augmentations import GAN_Augmentation
+from gan_lightning.utils.constants import Constants
 
 
 @register_dataset("mnist")
@@ -19,12 +20,7 @@ class MNISTDataModule(LightningDataModule):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.download = download
-        self.transform = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize((0.1307,), (0.3081,)),
-            ]
-        )
+        self.transform = GAN_Augmentation(Constants.augment_config_dir)
 
         self.dims = (1, 28, 28)
         self.num_classes = 10

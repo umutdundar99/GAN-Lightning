@@ -40,6 +40,7 @@ class DeepConvGAN(LightningModule):
     def training_step(self, batch: List[torch.Tensor]):
         gen_opt, disc_opt = self.optimizers()
         X, _ = batch
+        X = X.unsqueeze(1)
         batch_size = X.shape[0]
 
         disc_opt.zero_grad()

@@ -42,6 +42,8 @@ class WGAN(LightningModule):
     def training_step(self, batch: List[torch.Tensor]):
         gen_opt, disc_opt = self.optimizers()
         X, _ = batch
+        # add a dim to first channel 
+        X = X.unsqueeze(1)
         batch_size = X.shape[0]
         for _ in range(self.D_train_freq):
             disc_opt.zero_grad()
