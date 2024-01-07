@@ -4,6 +4,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, random_split
 from gan_lightning.input import register_dataset
 
+
 @register_dataset("mnist")
 class MNISTDataModule(LightningDataModule):
     def __init__(
@@ -41,7 +42,9 @@ class MNISTDataModule(LightningDataModule):
 
         # Assign test dataset for use in dataloader(s)
         if stage == "test" or stage is None:
-            self.mnist_test = MNIST(self.data_dir, train=False, transform=self.transform)
+            self.mnist_test = MNIST(
+                self.data_dir, train=False, transform=self.transform
+            )
 
     def train_dataloader(self):
         return DataLoader(
@@ -51,7 +54,11 @@ class MNISTDataModule(LightningDataModule):
         )
 
     def val_dataloader(self):
-        return DataLoader(self.mnist_val, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(
+            self.mnist_val, batch_size=self.batch_size, num_workers=self.num_workers
+        )
 
     def test_dataloader(self):
-        return DataLoader(self.mnist_test, batch_size=self.batch_size, num_workers=self.num_workers)
+        return DataLoader(
+            self.mnist_test, batch_size=self.batch_size, num_workers=self.num_workers
+        )

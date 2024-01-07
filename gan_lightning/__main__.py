@@ -21,16 +21,17 @@ def GAN_Lightning(config: DictConfig):
         strategy = None
 
     # TODO: Add MLFLOW Logger
-    logger = MLFlowLogger(experiment_name=config.logger.experiment_name, 
-                          run_name = config.logger.run_name, 
-                          log_model= config.logger.log_model,
-                          tracking_uri="http://localhost:5000")
-    
+    logger = MLFlowLogger(
+        experiment_name=config.logger.experiment_name,
+        run_name=config.logger.run_name,
+        log_model=config.logger.log_model,
+        tracking_uri="http://localhost:5000",
+    )
+
     loss = get_loss(config.training_params.loss)
     model = get_model(config.training_params, loss)
     dataloader = get_dataloader(config.dataset)
     # TODO: Get it from a dataloader.py file
-
 
     trainer = pl.Trainer(
         accelerator=config.training_params.accelerator,

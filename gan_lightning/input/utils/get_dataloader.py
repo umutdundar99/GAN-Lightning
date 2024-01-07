@@ -1,7 +1,8 @@
+from gan_lightning.input.data import *  # noqa
 from omegaconf import OmegaConf
-from gan_lightning.input.data import *
 from gan_lightning.input import registered_dataloaders
 import inspect
+
 
 def get_dataloader(config, **kwargs):
     config = OmegaConf.to_container(config)
@@ -9,8 +10,8 @@ def get_dataloader(config, **kwargs):
     config = adjust_config(dataloader, config)
     dataloader = dataloader(**config, **kwargs)
     return dataloader
-    
-    
+
+
 def adjust_config(loader, config: dict):
     constructor_info = inspect.getfullargspec(loader.__init__)
     config_iter = config.copy()

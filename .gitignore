@@ -19,3 +19,8 @@ imgs
 .vscode
 
 ```
+
+#mlflow
+```
+mlruns/
+```
