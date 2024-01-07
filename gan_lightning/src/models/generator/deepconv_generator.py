@@ -4,7 +4,6 @@ import lightning.pytorch as pl
 from gan_lightning.src.models.blocks.generator_block.generator_blocks import (
     deepconv_generator_block,
 )
-from gan_lightning.utils.noise import create_noise
 from gan_lightning.src.models import model_registration
 
 
