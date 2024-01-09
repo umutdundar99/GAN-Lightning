@@ -31,7 +31,7 @@ def GAN_Lightning(config: DictConfig):
     )
 
     loss = get_loss(config.training_params.loss)
-    model = get_model(config.training_params, loss)
+    model = get_model(config.training_params, config.dataset, loss)
     dataloader = get_dataloader(config.dataset)
     # TODO: Get it from a dataloader.py file
 
