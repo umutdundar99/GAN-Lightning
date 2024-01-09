@@ -1,7 +1,7 @@
 Normalize:
   always_apply: True
-  mean: [0.1307]
-  std: [0.3081]
+  mean: [0.5]
+  std: [0.5]
   p: 1.0
 Resize:
   always_apply: false
@@ -25,7 +25,3 @@ ImageCompression:
   quality_lower: 50
   quality_upper: 100
   p: 0.0
-
-
-
-

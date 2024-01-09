@@ -20,7 +20,7 @@ class GAN_Augmentation:
             aug_params = config[aug.__name__]
             aug_params = {k: v for k, v in aug_params.items() if v is not None}
             self.compose_list.append(aug(**aug_params))
-            
+
     def __call__(self, image):
         return A.Compose(self.compose_list)(image=np.array(image))["image"]
 
@@ -35,4 +35,3 @@ class GAN_Augmentation:
 
     def __getitem__(self, idx):
         return self.compose_list[idx]
-    
