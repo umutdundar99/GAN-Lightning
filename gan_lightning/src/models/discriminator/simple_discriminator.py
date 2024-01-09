@@ -15,6 +15,7 @@ class Simple_Discriminator(pl.LightningModule):
             simple_1d_discriminator_block(img_channel, hidden_dim * 4),
             simple_1d_discriminator_block(hidden_dim * 4, hidden_dim * 2),
             simple_1d_discriminator_block(hidden_dim * 2, hidden_dim),
+            
             nn.Linear(hidden_dim, 1),
         )
 

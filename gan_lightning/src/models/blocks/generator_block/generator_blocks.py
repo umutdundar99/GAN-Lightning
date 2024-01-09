@@ -31,7 +31,7 @@ class deepconv_generator_block(nn.Module):
 
         self.block = nn.Sequential(
             nn.ConvTranspose2d(
-                input_channels, output_channels, kernel_size=kernel_size, stride=stride
+                input_channels, output_channels, kernel_size=kernel_size, stride=stride,
             ),
             nn.BatchNorm2d(output_channels),
             nn.ReLU(inplace=True),
