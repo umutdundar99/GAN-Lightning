@@ -1,4 +1,4 @@
-import torch
+import torch.nn as nn
 import lightning.pytorch as pl
 from gan_lightning.src.models.blocks.generator_block.generator_blocks import (
     deepconv_generator_block,
@@ -13,7 +13,7 @@ class DeepConv_Generator(pl.LightningModule):
     ):
         super().__init__()
         self.input_dim = input_dim
-        self.generator = torch.nn.Sequential(
+        self.generator = nn.Sequential(
             deepconv_generator_block(input_dim, hidden_dim * 4, stride=1),
             deepconv_generator_block(hidden_dim * 4, hidden_dim*8, stride=1),
             deepconv_generator_block(hidden_dim * 8, hidden_dim*4, kernel_size=4, stride=1),
@@ -31,3 +31,11 @@ class DeepConv_Generator(pl.LightningModule):
         x = self.generator(x)
         x = self.final_block(x, True)
         return x
+    
+    def _init_weight(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()

@@ -30,8 +30,10 @@ class ConditionalGAN(LightningModule):
         self.num_classes = getattr(Constants.num_classes, dataset_config["name"])
         self.input_dim = training_config["input_dim"]
         self.input_dim, self.img_channel = self.set_input_dim(self.input_dim, img_channel, self.num_classes)
-        self.G = DeepConv_Generator(input_dim=self.input_dim).apply(self.weights_inits)
-        self.D = DeepConv_Discriminator(img_channel=self.img_channel, hidden_dim=training_config["input_dim"]).apply(self.weights_inits)
+        self.G = DeepConv_Generator(input_dim=self.input_dim)
+        self.G._init_weight()
+        self.D = DeepConv_Discriminator(img_channel=self.img_channel, hidden_dim=training_config["input_dim"])
+        self.D._init_weight()
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
         self.discriminator_loss = losses.get("discriminator_loss", None)
@@ -116,13 +118,6 @@ class ConditionalGAN(LightningModule):
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():
             setattr(self, key, value)
-
-    def weights_inits(self, m):
-        if isinstance(m, torch.nn.Conv2d) or isinstance(m, torch.nn.ConvTranspose2d):
-            torch.nn.init.normal_(m.weight, 0.0, 0.02)
-        if isinstance(m, torch.nn.BatchNorm2d):
-            torch.nn.init.normal_(m.weight, 0.0, 0.02)
-            torch.nn.init.constant_(m.bias, 0)
 
     def set_input_dim(self, input_dim: int, input_shape: List[int], num_classes: int):
         generator_input_dim = input_dim + num_classes

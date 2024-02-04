@@ -26,10 +26,10 @@ class WGAN(LightningModule):
         **kwargs,
     ):
         super().__init__()
-        self.G = DeepConv_Generator(input_dim=64, hidden_dim=64).apply(
-            self.weights_inits
-        )
-        self.D = DeepConv_Discriminator(hidden_dim=64).apply(self.weights_inits)
+        self.G = DeepConv_Generator(input_dim=64, hidden_dim=64)
+        self.G._init_weight()
+        self.D = DeepConv_Discriminator(hidden_dim=64)
+        self.D._init_weight()
         self.D_train_freq = 5
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
@@ -111,9 +111,4 @@ class WGAN(LightningModule):
         for key, value in config.items():
             setattr(self, key, value)
 
-    def weights_inits(self, m):
-        if isinstance(m, torch.nn.Conv2d) or isinstance(m, torch.nn.ConvTranspose2d):
-            torch.nn.init.normal_(m.weight, 0.0, 0.02)
-        if isinstance(m, torch.nn.BatchNorm2d):
-            torch.nn.init.normal_(m.weight, 0.0, 0.02)
-            torch.nn.init.constant_(m.bias, 0)
+    
