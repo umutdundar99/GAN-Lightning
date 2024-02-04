@@ -1,0 +1,27 @@
+Normalize:
+  always_apply: True
+  mean: [0.5]
+  std: [0.5]
+  p: 1.0
+Resize:
+  always_apply: false
+  height: 28
+  width: 28
+  p:  1.0
+RandomBrightnessContrast:
+  always_apply : False
+  p: 0.0
+RandomContrast:
+  always_apply : False
+  p: 0.0
+ElasticTransform:
+  always_apply : False
+  alpha: 10
+  sigma: 10
+  mask_value: None
+  p: 0.0
+ImageCompression:
+  always_apply : False
+  quality_lower: 50
+  quality_upper: 100
+  p: 0.0

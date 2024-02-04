@@ -13,8 +13,10 @@ class DeepConv_Discriminator(pl.LightningModule):
     def __init__(self, img_channel: int = 1, hidden_dim: int = 16, **kwargs):
         super().__init__()
         self.discriminator = nn.Sequential(
-            deepconv_discriminator_block(img_channel, hidden_dim),
-            deepconv_discriminator_block(hidden_dim, hidden_dim * 2),
+            deepconv_discriminator_block(img_channel, hidden_dim, padding=2, kernel_size=3),
+            deepconv_discriminator_block(hidden_dim, hidden_dim * 2, padding=2),
+            deepconv_discriminator_block(hidden_dim * 2, hidden_dim * 4, padding=2),
+            deepconv_discriminator_block(hidden_dim * 4, hidden_dim * 2, padding=2),
         )
 
         self.final_block = deepconv_discriminator_block(hidden_dim * 2, 1)
@@ -24,3 +26,12 @@ class DeepConv_Discriminator(pl.LightningModule):
         x = self.final_block(x, True)
         x = x.view(len(x), -1)
         return x
+
+    
+    def _init_weight(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()

@@ -6,15 +6,17 @@ from gan_lightning.src.models.gans import *
 from gan_lightning.src.models import registered_models
 
 
-def get_model(config, loss, **kwargs):
-    config = OmegaConf.to_container(config)
-    model_architecture = config["model"]["architecture"]
+def get_model(training_config, dataset_config, loss, **kwargs):
+    training_config = OmegaConf.to_container(training_config)
+    dataset_config = OmegaConf.to_container(dataset_config)
+    model_architecture = training_config["model"]["architecture"]
     model = registered_models[model_architecture]
 
     return model(
-        config=extract_model_params(config),
+        training_config=extract_model_params(training_config),
+        dataset_config=dataset_config,
         losses=loss,
-        optimizer_dict=config["optimizer"],
+        optimizer_dict=training_config["optimizer"],
         **kwargs
     )
 

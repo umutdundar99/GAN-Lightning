@@ -10,7 +10,7 @@ class BasicGenLoss(torch.nn.Module):
         self,
         generator: nn.Module,
         discriminator: nn.Module,
-        z_dim: int,
+        input_dim: int,
         device: str,
         loss: nn.Module = BCE(),
     ):
@@ -18,12 +18,14 @@ class BasicGenLoss(torch.nn.Module):
         self.generator = generator
         self.discriminator = discriminator
         self.loss = loss
-        self.z_dim = z_dim
+        self.input_dim = input_dim
         self.device = device
         self.create_noise = create_noise
 
     def forward(self, batch_size):
-        fake_noise = self.create_noise(batch_size, self.z_dim, device=self.device[0])
+        fake_noise = self.create_noise(
+            batch_size, self.input_dim, device=self.device[0]
+        )
         fake = self.generator(fake_noise)
         disc_fake_pred = self.discriminator(fake)
         gen_loss = self.loss(disc_fake_pred, torch.ones_like(disc_fake_pred))
@@ -38,7 +40,7 @@ class BasicDiscLoss(torch.nn.Module):
         self,
         generator: nn.Module,
         discriminator: nn.Module,
-        z_dim: int,
+        input_dim: int,
         device: str,
         loss: nn.Module = BCE(),
     ):
@@ -46,12 +48,12 @@ class BasicDiscLoss(torch.nn.Module):
         self.generator = generator
         self.discriminator = discriminator
         self.loss = loss
-        self.z_dim = z_dim
+        self.input_dim = input_dim
         self.device = device
         self.create_noise = create_noise
 
     def forward(self, x, batch_size):
-        noise = self.create_noise(batch_size, self.z_dim, device=self.device[0])
+        noise = self.create_noise(batch_size, self.input_dim, device=self.device[0])
         gen_out = self.generator(noise)
         disc_fake_pred = self.discriminator(gen_out.detach())
         disc_fake_loss = self.loss(disc_fake_pred, torch.zeros_like(disc_fake_pred))

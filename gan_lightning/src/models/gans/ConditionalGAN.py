@@ -9,14 +9,14 @@ from gan_lightning.src.models.discriminator.deepconv_discriminator import (
 
 from gan_lightning.src.models.generator.deepconv_generator import DeepConv_Generator
 from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
-from gan_lightning.utils.gradient import compute_gradient_penalty
 from gan_lightning.utils.noise import create_noise
 from gan_lightning.src.models import model_registration
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT
+from torch.nn import functional as F
+from gan_lightning.utils.constants import Constants
 
-
-@model_registration("WGAN")
-class WGAN(LightningModule):
+@model_registration("ConditionalGAN")
+class ConditionalGAN(LightningModule):
     def __init__(
         self,
         losses: Dict[str, Any],
@@ -26,23 +26,20 @@ class WGAN(LightningModule):
         **kwargs,
     ):
         super().__init__()
-        self.G = DeepConv_Generator(input_dim=64, hidden_dim=64)
+        img_channel = getattr(Constants.img_channel, dataset_config["name"])
+        self.num_classes = getattr(Constants.num_classes, dataset_config["name"])
+        self.input_dim = training_config["input_dim"]
+        self.input_dim, self.img_channel = self.set_input_dim(self.input_dim, img_channel, self.num_classes)
+        self.G = DeepConv_Generator(input_dim=self.input_dim)
         self.G._init_weight()
-        self.D = DeepConv_Discriminator(hidden_dim=64)
+        self.D = DeepConv_Discriminator(img_channel=self.img_channel, hidden_dim=training_config["input_dim"])
         self.D._init_weight()
-        self.D_train_freq = 5
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
         self.discriminator_loss = losses.get("discriminator_loss", None)
         self.d_loss = self.discriminator_loss()
         self.generator_loss = losses.get("generator_loss", None)
         self.g_loss = self.generator_loss()
-        assert (
-            self.generator_loss.__name__ == "WGenLoss"
-        ), "Generator loss must be WGenLoss for this specific model"  # noqa
-        assert (
-            self.discriminator_loss.__name__ == "WDiscLoss"
-        ), "Discriminator loss must be WDiscLoss for this specific model"  # noqa
         self.automatic_optimization = False
 
     def forward(self, x: torch.Tensor):
@@ -50,40 +47,51 @@ class WGAN(LightningModule):
 
     def training_step(self, batch: List[torch.Tensor]):
         gen_opt, disc_opt = self.optimizers()
-        X, _ = batch
-        # add a dim to first channel
+        X, y = batch
         X = X.unsqueeze(1)
         batch_size = X.shape[0]
-        for _ in range(self.D_train_freq):
-            disc_opt.zero_grad()
-            fake_noise = create_noise(batch_size, self.input_dim)
-            gen_fake_out = self.G(fake_noise)
-            disc_fake_out = self.D(gen_fake_out.detach())
-            disc_real_out = self.D(X)
-            alpha = torch.rand(
-                len(X), 1, 1, 1, device=gen_fake_out.device, requires_grad=True
-            )
-            penalty = compute_gradient_penalty(self.D, X, gen_fake_out.detach(), alpha)
-            D_loss = self.d_loss(disc_real_out, disc_fake_out, penalty)
-            D_loss.backward(retain_graph=True)
-            disc_opt.step()
-
+        one_hot_labels = F.one_hot(y, num_classes=self.num_classes)
+        y = one_hot_labels[:, :, None, None]
+        y = y.repeat(1, 1, X.shape[2], X.shape[2])
+       
+        disc_opt.zero_grad()
+        fake_noise = create_noise(batch_size, self.input_dim)
+       
+        # The idea: concatenate the noise with the one-hot labels to create a new input for the generator
+        # Generator will then generate images based on the noise and the one-hot labels
+        # So that, one_hot-labels can be used to control the generator as a Z vector
+        combined_noise = torch.cat((fake_noise, one_hot_labels), dim=1)
+        gen_fake_out = self.G(combined_noise)
+        
+        fake_image_and_y = torch.cat((gen_fake_out, y), dim=1)
+        disc_fake_out = self.D(fake_image_and_y.detach())
+        
+        real_image_and_y = torch.cat((X, y), dim=1)
+        disc_real_out = self.D(real_image_and_y)
+        
+        disc_fake_loss = self.d_loss(disc_fake_out, torch.zeros_like(disc_fake_out))
+        disc_real_loss = self.d_loss(disc_real_out, torch.ones_like(disc_real_out))
+        disc_loss = (disc_fake_loss + disc_real_loss) / 2
+        disc_loss.backward(retain_graph=True)
+        disc_opt.step()
+        
         gen_opt.zero_grad()
-        fake_noise_2 = create_noise(batch_size, self.input_dim)
-        gen_fake_out_2 = self.G(fake_noise_2)
-        disc_fake_out_2 = self.D(gen_fake_out_2)
-        G_loss = self.g_loss(disc_fake_out_2)
-        G_loss.backward()
+        fake_image_and_y = torch.cat((gen_fake_out, y), dim=1)
+        disc_fake_out_2 = self.D(fake_image_and_y)
+        gen_loss = self.g_loss(disc_fake_out_2, torch.ones_like(disc_fake_out_2))
+        gen_loss.backward()
         gen_opt.step()
 
-        self.log("discriminator_loss", D_loss, prog_bar=True)
-        self.log("generator_loss", G_loss, prog_bar=True)
-        return G_loss + D_loss
+        self.log("discriminator_loss", disc_loss, prog_bar=True)
+        self.log("generator_loss", gen_loss, prog_bar=True)
+        return disc_loss + gen_loss
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         noise = create_noise(40, self.input_dim)
+        y = 8
+        one_hot_labels = F.one_hot(torch.tensor([y] * 40), num_classes=10).to(self.device)
+        noise = torch.cat((noise, one_hot_labels), dim=1)
         generated_images = self(noise)
-
         if self.current_epoch % 6 == 0:
             for enum, img in enumerate(generated_images):
                 image = img.cpu().detach().numpy()
@@ -111,4 +119,8 @@ class WGAN(LightningModule):
         for key, value in config.items():
             setattr(self, key, value)
 
-    
+    def set_input_dim(self, input_dim: int, input_shape: List[int], num_classes: int):
+        generator_input_dim = input_dim + num_classes
+        discriminator_im_chan = input_shape + num_classes
+        
+        return generator_input_dim, discriminator_im_chan
