@@ -26,9 +26,9 @@ class DeepConvGAN(LightningModule):
     ):
         super().__init__()
         self.G = DeepConv_Generator(input_dim=64)
-        self.G._init_weight()
+        self.G._init_weight(training_config["weight_init"])
         self.D = DeepConv_Discriminator()
-        self.D._init_weight()
+        self.D._init_weight(training_config["weight_init"])
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
         self.discriminator_loss = losses.get("discriminator_loss", None)

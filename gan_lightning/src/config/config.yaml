@@ -13,14 +13,15 @@ training_params:
   display_step: 500
   device_num: [0]
   accelerator: gpu
+  weight_init: normal
   model:
     input_dim: 64
-    architecture: ConditionalGAN
+    architecture: WGAN
     input_size: 28 # set it to 28 for mnist and 32 for cifar10
     pretrained: false
   loss:
-    discriminator_loss: BCEWithLogitsLoss
-    generator_loss: BCEWithLogitsLoss
+    discriminator_loss: WDiscLoss
+    generator_loss: WGenLoss
   optimizer:
     optimizer_name: adam
     lr: 0.0002

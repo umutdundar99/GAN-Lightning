@@ -32,10 +32,18 @@ class DeepConv_Generator(pl.LightningModule):
         x = self.final_block(x, True)
         return x
     
-    def _init_weight(self):
+    def _init_weight(self, mode):
         for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight)
+            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear) or isinstance(m, nn.ConvTranspose2d):
+                if mode == "normal":
+                    nn.init.normal_(m.weight, 0, 0.02)
+                elif mode == "xavier":
+                    nn.init.xavier_normal_(m.weight)
+                elif mode == "kaiming":
+                    nn.init.kaiming_normal_(m.weight)
+                else:
+                    raise ValueError("Invalid weight initialization mode")
+                
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()

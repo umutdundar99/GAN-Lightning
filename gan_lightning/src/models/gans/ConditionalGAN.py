@@ -31,9 +31,9 @@ class ConditionalGAN(LightningModule):
         self.input_dim = training_config["input_dim"]
         self.input_dim, self.img_channel = self.set_input_dim(self.input_dim, img_channel, self.num_classes)
         self.G = DeepConv_Generator(input_dim=self.input_dim)
-        self.G._init_weight()
+        self.G._init_weight(training_config["weight_init"])
         self.D = DeepConv_Discriminator(img_channel=self.img_channel, hidden_dim=training_config["input_dim"])
-        self.D._init_weight()
+        self.D._init_weight(training_config["weight_init"])
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
         self.discriminator_loss = losses.get("discriminator_loss", None)
