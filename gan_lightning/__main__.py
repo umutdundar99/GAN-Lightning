@@ -39,7 +39,7 @@ def GAN_Lightning(config: DictConfig):
         accelerator=config.training_params.accelerator,
         devices=devices,
         strategy=strategy,
-        #logger=logger,
+        # logger=logger,
         max_epochs=config.training_params.n_epochs,
     )
 

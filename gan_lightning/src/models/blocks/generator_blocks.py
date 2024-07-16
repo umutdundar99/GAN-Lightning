@@ -29,17 +29,22 @@ class deepconv_generator_block(nn.Module):
         final_block: bool = False,
     ):
         super(deepconv_generator_block, self).__init__()
-        
+
         if final_block:
             self.block = nn.Sequential(
-            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride),
-            nn.Tanh(),
-        )
+                nn.ConvTranspose2d(
+                    input_channels, output_channels, kernel_size, stride
+                ),
+                nn.Tanh(),
+            )
 
         else:
             self.block = nn.Sequential(
                 nn.ConvTranspose2d(
-                    input_channels, output_channels, kernel_size=kernel_size, stride=stride,
+                    input_channels,
+                    output_channels,
+                    kernel_size=kernel_size,
+                    stride=stride,
                 ),
                 nn.BatchNorm2d(output_channels),
                 nn.ReLU(inplace=True),

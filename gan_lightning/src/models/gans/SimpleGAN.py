@@ -25,7 +25,7 @@ class SimpleGAN(LightningModule):
     ):
         super().__init__()
         self.set_attributes(training_config)
-        self.G = Simple_Generator(input_dim = self.input_dim)
+        self.G = Simple_Generator(input_dim=self.input_dim)
         self.D = Simple_Discriminator()
         self.optimizer_dict = optimizer_dict
 
@@ -34,7 +34,9 @@ class SimpleGAN(LightningModule):
             self.G, self.D, self.input_dim, self.device_num
         )
         self.generator_loss = losses.get("generator_loss", None)
-        self.g_loss = self.generator_loss(self.G, self.D, self.input_dim, self.device_num)
+        self.g_loss = self.generator_loss(
+            self.G, self.D, self.input_dim, self.device_num
+        )
         self.automatic_optimization = False
 
     def forward(self, x: torch.Tensor):

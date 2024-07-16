@@ -15,6 +15,7 @@ from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 from torch.nn import functional as F
 from gan_lightning.utils.constants import Constants
 
+
 @model_registration("ConditionalGAN")
 class ConditionalGAN(LightningModule):
     def __init__(
@@ -29,10 +30,14 @@ class ConditionalGAN(LightningModule):
         img_channel = getattr(Constants.img_channel, dataset_config["name"])
         self.num_classes = getattr(Constants.num_classes, dataset_config["name"])
         self.input_dim = training_config["input_dim"]
-        self.input_dim, self.img_channel = self.set_input_dim(self.input_dim, img_channel, self.num_classes)
+        self.input_dim, self.img_channel = self.set_input_dim(
+            self.input_dim, img_channel, self.num_classes
+        )
         self.G = DeepConv_Generator(input_dim=self.input_dim)
         self.G._init_weight(training_config["weight_init"])
-        self.D = DeepConv_Discriminator(img_channel=self.img_channel, hidden_dim=training_config["input_dim"])
+        self.D = DeepConv_Discriminator(
+            img_channel=self.img_channel, hidden_dim=training_config["input_dim"]
+        )
         self.D._init_weight(training_config["weight_init"])
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
@@ -53,28 +58,28 @@ class ConditionalGAN(LightningModule):
         one_hot_labels = F.one_hot(y, num_classes=self.num_classes)
         y = one_hot_labels[:, :, None, None]
         y = y.repeat(1, 1, X.shape[2], X.shape[2])
-       
+
         disc_opt.zero_grad()
         fake_noise = create_noise(batch_size, self.input_dim)
-       
+
         # The idea: concatenate the noise with the one-hot labels to create a new input for the generator
         # Generator will then generate images based on the noise and the one-hot labels
         # So that, one_hot-labels can be used to control the generator as a Z vector
         combined_noise = torch.cat((fake_noise, one_hot_labels), dim=1)
         gen_fake_out = self.G(combined_noise)
-        
+
         fake_image_and_y = torch.cat((gen_fake_out, y), dim=1)
         disc_fake_out = self.D(fake_image_and_y.detach())
-        
+
         real_image_and_y = torch.cat((X, y), dim=1)
         disc_real_out = self.D(real_image_and_y)
-        
+
         disc_fake_loss = self.d_loss(disc_fake_out, torch.zeros_like(disc_fake_out))
         disc_real_loss = self.d_loss(disc_real_out, torch.ones_like(disc_real_out))
         disc_loss = (disc_fake_loss + disc_real_loss) / 2
         disc_loss.backward(retain_graph=True)
         disc_opt.step()
-        
+
         gen_opt.zero_grad()
         fake_image_and_y = torch.cat((gen_fake_out, y), dim=1)
         disc_fake_out_2 = self.D(fake_image_and_y)
@@ -89,7 +94,9 @@ class ConditionalGAN(LightningModule):
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         noise = create_noise(40, self.input_dim)
         y = 8
-        one_hot_labels = F.one_hot(torch.tensor([y] * 40), num_classes=10).to(self.device)
+        one_hot_labels = F.one_hot(torch.tensor([y] * 40), num_classes=10).to(
+            self.device
+        )
         noise = torch.cat((noise, one_hot_labels), dim=1)
         generated_images = self(noise)
         if self.current_epoch % 6 == 0:
@@ -122,5 +129,5 @@ class ConditionalGAN(LightningModule):
     def set_input_dim(self, input_dim: int, input_shape: List[int], num_classes: int):
         generator_input_dim = input_dim + num_classes
         discriminator_im_chan = input_shape + num_classes
-        
+
         return generator_input_dim, discriminator_im_chan

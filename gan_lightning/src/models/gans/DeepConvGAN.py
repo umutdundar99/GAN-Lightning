@@ -31,14 +31,16 @@ class DeepConvGAN(LightningModule):
         self.D._init_weight(training_config["weight_init"])
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
-        
+
         self.discriminator_loss = losses.get("discriminator_loss", None)
         self.d_loss = self.discriminator_loss(
             self.G, self.D, self.input_dim, self.device_num
         )
         self.generator_loss = losses.get("generator_loss", None)
-        self.g_loss = self.generator_loss(self.G, self.D, self.input_dim, self.device_num)
-        
+        self.g_loss = self.generator_loss(
+            self.G, self.D, self.input_dim, self.device_num
+        )
+
         self.automatic_optimization = False
 
     def forward(self, x: torch.Tensor):
@@ -93,5 +95,3 @@ class DeepConvGAN(LightningModule):
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():
             setattr(self, key, value)
-
-

@@ -22,10 +22,14 @@ class Simple_Generator(pl.LightningModule):
 
     def forward(self, noise):
         return self.generator(noise)
-    
+
     def _init_weight(self, mode):
         for m in self.modules():
-            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear) or isinstance(m, nn.ConvTranspose2d):
+            if (
+                isinstance(m, nn.Conv2d)
+                or isinstance(m, nn.Linear)
+                or isinstance(m, nn.ConvTranspose2d)
+            ):
                 if mode == "normal":
                     nn.init.normal_(m.weight, 0, 0.02)
                 elif mode == "xavier":
@@ -34,7 +38,7 @@ class Simple_Generator(pl.LightningModule):
                     nn.init.kaiming_normal_(m.weight)
                 else:
                     raise ValueError("Invalid weight initialization mode")
-                
+
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()

@@ -15,7 +15,6 @@ class Simple_Discriminator(pl.LightningModule):
             simple_1d_discriminator_block(img_channel, hidden_dim * 4),
             simple_1d_discriminator_block(hidden_dim * 4, hidden_dim * 2),
             simple_1d_discriminator_block(hidden_dim * 2, hidden_dim),
-            
             nn.Linear(hidden_dim, 1),
         )
 
@@ -24,7 +23,11 @@ class Simple_Discriminator(pl.LightningModule):
 
     def _init_weight(self, mode):
         for m in self.modules():
-            if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear) or isinstance(m, nn.ConvTranspose2d):
+            if (
+                isinstance(m, nn.Conv2d)
+                or isinstance(m, nn.Linear)
+                or isinstance(m, nn.ConvTranspose2d)
+            ):
                 if mode == "normal":
                     nn.init.normal_(m.weight, 0, 0.02)
                 elif mode == "xavier":
@@ -33,7 +36,7 @@ class Simple_Discriminator(pl.LightningModule):
                     nn.init.kaiming_normal_(m.weight)
                 else:
                     raise ValueError("Invalid weight initialization mode")
-                
+
             elif isinstance(m, nn.BatchNorm2d):
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()

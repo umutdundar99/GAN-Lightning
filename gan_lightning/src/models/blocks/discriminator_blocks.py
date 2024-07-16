@@ -27,20 +27,23 @@ class deepconv_discriminator_block(nn.Module):
         final_block: bool = False,
     ):
         super().__init__()
-        
+
         if final_block:
             self.block = nn.Sequential(
-            nn.AdaptiveAvgPool2d((4,4)),
-            nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding)
-        )
+                nn.AdaptiveAvgPool2d((4, 4)),
+                nn.Conv2d(
+                    input_channels, output_channels, kernel_size, stride, padding
+                ),
+            )
         else:
             self.block = nn.Sequential(
-                nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding),
+                nn.Conv2d(
+                    input_channels, output_channels, kernel_size, stride, padding
+                ),
                 nn.BatchNorm2d(output_channels),
                 nn.LeakyReLU(0.2, inplace=True),
             )
 
-    
     def forward(self, x: torch.Tensor, is_final: bool = False):
 
         return self.block(x)

@@ -110,5 +110,3 @@ class WGAN(LightningModule):
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():
             setattr(self, key, value)
-
-    

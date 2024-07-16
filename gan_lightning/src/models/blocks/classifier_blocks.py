@@ -4,8 +4,15 @@ from typing import Optional
 
 
 class controllable_classifier_block(nn.Module):
-    def __init__(self, input_channels: int, output_channels: int, kernel_size = 4, stride = 2, final_layer = False):
-        super().__init__() 
+    def __init__(
+        self,
+        input_channels: int,
+        output_channels: int,
+        kernel_size=4,
+        stride=2,
+        final_layer=False,
+    ):
+        super().__init__()
         self.block = nn.Sequential(
             nn.Conv2d(input_channels, output_channels, kernel_size, stride),
         )
@@ -15,8 +22,8 @@ class controllable_classifier_block(nn.Module):
             nn.BatchNorm2d(output_channels),
             nn.LeakyReLU(0.2, inplace=True),
         )
-        
-    def forward(self, x : torch.Tensor, is_final: bool = False):
+
+    def forward(self, x: torch.Tensor, is_final: bool = False):
         if is_final:
             x = self.final_block(x)
         else:
