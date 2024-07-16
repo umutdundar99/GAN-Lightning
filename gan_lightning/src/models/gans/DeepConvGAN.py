@@ -31,10 +31,14 @@ class DeepConvGAN(LightningModule):
         self.D._init_weight(training_config["weight_init"])
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
+        
         self.discriminator_loss = losses.get("discriminator_loss", None)
-        self.d_loss = self.discriminator_loss()
+        self.d_loss = self.discriminator_loss(
+            self.G, self.D, self.input_dim, self.device_num
+        )
         self.generator_loss = losses.get("generator_loss", None)
-        self.g_loss = self.generator_loss()
+        self.g_loss = self.generator_loss(self.G, self.D, self.input_dim, self.device_num)
+        
         self.automatic_optimization = False
 
     def forward(self, x: torch.Tensor):
@@ -47,22 +51,12 @@ class DeepConvGAN(LightningModule):
         batch_size = X.shape[0]
 
         disc_opt.zero_grad()
-        fake_noise = create_noise(batch_size, self.input_dim)
-        gen_fake_out = self.G(fake_noise)
-        disc_fake_out = self.D(gen_fake_out.detach())
-        disc_fake_loss = self.d_loss(disc_fake_out, torch.zeros_like(disc_fake_out))
-
-        disc_real_out = self.D(X)
-        disc_real_loss = self.d_loss(disc_real_out, torch.ones_like(disc_real_out))
-        disc_loss = (disc_fake_loss + disc_real_loss) / 2
+        disc_loss = self.d_loss(X, batch_size)
         disc_loss.backward()
         disc_opt.step()
 
         gen_opt.zero_grad()
-        fake_noise_2 = create_noise(batch_size, self.input_dim)
-        gen_out_2 = self.G(fake_noise_2)
-        disc_fake_out_2 = self.D(gen_out_2)
-        gen_loss = self.g_loss(disc_fake_out_2, torch.ones_like(disc_fake_out_2))
+        gen_loss = self.g_loss(batch_size)
         gen_loss.backward()
         gen_opt.step()
 
