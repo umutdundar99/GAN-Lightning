@@ -1,7 +1,7 @@
 from omegaconf import OmegaConf
 from typing import Dict
-from gan_lightning.src.models.discriminator import *
-from gan_lightning.src.models.generator import *
+from gan_lightning.src.models.discriminators import *
+from gan_lightning.src.models.generators import *
 from gan_lightning.src.models.gans import *
 from gan_lightning.src.models import registered_models
 

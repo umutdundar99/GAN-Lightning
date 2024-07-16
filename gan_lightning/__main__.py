@@ -23,12 +23,12 @@ def GAN_Lightning(config: DictConfig):
         strategy = None
 
     # TODO: Add MLFLOW Logger
-    logger = MLFlowLogger(
-        experiment_name=config.logger.experiment_name,
-        run_name=config.logger.run_name,
-        log_model=config.logger.log_model,
-        tracking_uri="http://localhost:5000",
-    )
+    # logger = MLFlowLogger(
+    #     experiment_name=config.logger.experiment_name,
+    #     run_name=config.logger.run_name,
+    #     log_model=config.logger.log_model,
+    #     tracking_uri="http://localhost:5000",
+    # )
 
     loss = get_loss(config.training_params.loss)
     model = get_model(config.training_params, config.dataset, loss)
@@ -39,7 +39,7 @@ def GAN_Lightning(config: DictConfig):
         accelerator=config.training_params.accelerator,
         devices=devices,
         strategy=strategy,
-        logger=logger,
+        #logger=logger,
         max_epochs=config.training_params.n_epochs,
     )
 

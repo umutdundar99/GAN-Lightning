@@ -16,12 +16,12 @@ training_params:
   weight_init: normal
   model:
     input_dim: 64
-    architecture: WGAN
+    architecture: DeepConvGAN
     input_size: 28 # set it to 28 for mnist and 32 for cifar10
     pretrained: false
   loss:
-    discriminator_loss: WDiscLoss
-    generator_loss: WGenLoss
+    discriminator_loss: BasicDiscLoss
+    generator_loss: BasicGenLoss
   optimizer:
     optimizer_name: adam
     lr: 0.0002

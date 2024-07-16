@@ -1,7 +1,7 @@
 import lightning.pytorch as pl
 import torch
 from torch import nn
-from gan_lightning.src.models.blocks.discriminator_block.discriminator_blocks import (  # noqa
+from gan_lightning.src.models.blocks.discriminator_blocks import (  # noqa
     deepconv_discriminator_block,
 )
 
@@ -19,11 +19,11 @@ class DeepConv_Discriminator(pl.LightningModule):
             deepconv_discriminator_block(hidden_dim * 4, hidden_dim * 2, padding=2),
         )
 
-        self.final_block = deepconv_discriminator_block(hidden_dim * 2, 1)
+        self.final_block = deepconv_discriminator_block(hidden_dim * 2, 1, final_block=True)
 
     def forward(self, x: torch.Tensor):
         x = self.discriminator(x)
-        x = self.final_block(x, True)
+        x = self.final_block(x)
         x = x.view(len(x), -1)
         return x
 

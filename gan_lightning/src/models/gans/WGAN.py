@@ -3,11 +3,11 @@ import cv2
 import os
 from typing import Dict, Any, List, Optional
 from pytorch_lightning import LightningModule
-from gan_lightning.src.models.discriminator.deepconv_discriminator import (
+from gan_lightning.src.models.discriminators.deepconv_discriminator import (
     DeepConv_Discriminator,
 )
 
-from gan_lightning.src.models.generator.deepconv_generator import DeepConv_Generator
+from gan_lightning.src.models.generators.deepconv_generator import DeepConv_Generator
 from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
 from gan_lightning.utils.gradient import compute_gradient_penalty
 from gan_lightning.utils.noise import create_noise

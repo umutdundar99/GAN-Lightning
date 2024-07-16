@@ -1,6 +1,6 @@
 import torch.nn as nn
 import lightning.pytorch as pl
-from gan_lightning.src.models.blocks.generator_block.generator_blocks import (
+from gan_lightning.src.models.blocks.generator_blocks import (
     deepconv_generator_block,
 )
 from gan_lightning.src.models import model_registration
@@ -22,14 +22,14 @@ class DeepConv_Generator(pl.LightningModule):
         )
 
         self.final_block = deepconv_generator_block(
-            hidden_dim, img_channel, kernel_size=6
+            hidden_dim, img_channel, kernel_size=6, final_block = True
         )
         
     # O=(I−1)×stride−2×padding+kernel_size
     def forward(self, noise):
         x = noise.view(len(noise), self.input_dim, 1, 1)
         x = self.generator(x)
-        x = self.final_block(x, True)
+        x = self.final_block(x)
         return x
     
     def _init_weight(self, mode):

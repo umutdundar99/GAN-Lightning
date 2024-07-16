@@ -3,10 +3,10 @@ import cv2
 import os
 from typing import Dict, Any, List, Optional
 from pytorch_lightning import LightningModule
-from gan_lightning.src.models.discriminator.simple_discriminator import (
+from gan_lightning.src.models.discriminators.simple_discriminator import (
     Simple_Discriminator,
 )
-from gan_lightning.src.models.generator.simple_generator import Simple_Generator
+from gan_lightning.src.models.generators.simple_generator import Simple_Generator
 from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
 from gan_lightning.utils.noise import create_noise
 from gan_lightning.src.models import model_registration
@@ -24,11 +24,11 @@ class SimpleGAN(LightningModule):
         **kwargs,
     ):
         super().__init__()
-        self.G = Simple_Generator()
+        self.set_attributes(training_config)
+        self.G = Simple_Generator(input_dim = self.input_dim)
         self.D = Simple_Discriminator()
         self.optimizer_dict = optimizer_dict
 
-        self.set_attributes(training_config)
         self.discriminator_loss = losses.get("discriminator_loss", None)
         self.d_loss = self.discriminator_loss(
             self.G, self.D, self.input_dim, self.device_num
