@@ -1,6 +1,5 @@
 registered_models = {}
 
-
 def model_registration(model_name):
     def register(dataset_cls):
         if model_name in registered_models:

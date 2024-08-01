@@ -3,6 +3,7 @@ import torch
 from gan_lightning.utils.noise import create_noise
 from torch.nn import BCEWithLogitsLoss as BCE
 from torch import nn
+from kornia.losses import FocalLoss as FL
 
 
 class BasicGenLoss(torch.nn.Module):
@@ -96,3 +97,32 @@ class WDiscLoss(torch.nn.Module):
 
     def __name__(self):
         return "WDiscLoss"
+
+
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=1, gamma=2, reduce=True):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduce = reduce
+        self.criterion = BCEWithLogitsLoss()
+
+    def forward(self, inputs, targets):
+
+        BCE_loss = self.criterion(inputs, targets)
+        pt = torch.exp(-BCE_loss)
+        F_loss = self.alpha * (1 - pt) ** self.gamma * BCE_loss
+
+        if self.reduce:
+            return torch.mean(F_loss)
+            
+    def __name__(self):
+        return "FocalLoss"
+    
+class BCEWithLogitsLoss(BCE):
+    
+    def __init__(self):
+        super(BCEWithLogitsLoss, self).__init__()
+    
+    def __name__(self):
+        return "BCEWithLogitsLoss"

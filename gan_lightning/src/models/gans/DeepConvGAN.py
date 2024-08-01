@@ -3,11 +3,11 @@ import cv2
 import os
 from typing import Dict, Any, List, Optional
 from pytorch_lightning import LightningModule
-from gan_lightning.src.models.discriminator.deepconv_discriminator import (
+from gan_lightning.src.models.discriminators.deepconv_discriminator import (
     DeepConv_Discriminator,
 )
 
-from gan_lightning.src.models.generator.deepconv_generator import DeepConv_Generator
+from gan_lightning.src.models.generators.deepconv_generator import DeepConv_Generator
 from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
 from gan_lightning.utils.noise import create_noise
 from gan_lightning.src.models import model_registration
@@ -26,19 +26,21 @@ class DeepConvGAN(LightningModule):
     ):
         super().__init__()
         self.G = DeepConv_Generator(input_dim=64)
-        self.G._init_weight(training_config["weight_init"])
+        self.G.weight_init(training_config["weight_init_name"])
         self.D = DeepConv_Discriminator()
-        self.D._init_weight(training_config["weight_init"])
+        self.D.weight_init(training_config["weight_init_name"])
         self.optimizer_dict = optimizer_dict
         self.set_attributes(training_config)
-        
+
         self.discriminator_loss = losses.get("discriminator_loss", None)
         self.d_loss = self.discriminator_loss(
             self.G, self.D, self.input_dim, self.device_num
         )
         self.generator_loss = losses.get("generator_loss", None)
-        self.g_loss = self.generator_loss(self.G, self.D, self.input_dim, self.device_num)
-        
+        self.g_loss = self.generator_loss(
+            self.G, self.D, self.input_dim, self.device_num
+        )
+
         self.automatic_optimization = False
 
     def forward(self, x: torch.Tensor):
@@ -93,5 +95,3 @@ class DeepConvGAN(LightningModule):
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():
             setattr(self, key, value)
-
-

@@ -1,4 +1,6 @@
 import hydra
+import os
+import time
 import pytorch_lightning as pl
 from omegaconf import DictConfig
 from pytorch_lightning.accelerators.cuda import CUDAAccelerator
@@ -22,13 +24,29 @@ def GAN_Lightning(config: DictConfig):
     else:
         strategy = None
 
-    # TODO: Add MLFLOW Logger
     logger = MLFlowLogger(
         experiment_name=config.logger.experiment_name,
         run_name=config.logger.run_name,
         log_model=config.logger.log_model,
         tracking_uri="http://localhost:5000",
     )
+
+    callbacks = []
+    hour_day_month = time.strftime("%H-%d-%m")
+    if not os.path.exists(os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month)):
+        os.makedirs(os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month)) 
+    
+    checkpoint_callback = pl.callbacks.ModelCheckpoint(
+            monitor="val_loss",
+            dirpath=os.path.join(os.path.join(os.getcwd(), "models")),
+            filename=os.path.join("checkpoints", hour_day_month, config.logger.run_name+"-{epoch:02d}-{val_loss:.2f}"),)
+    
+    RichProgressBar = pl.callbacks.RichProgressBar()
+    
+    
+    
+    callbacks.append(RichProgressBar)
+    callbacks.append(checkpoint_callback)
 
     loss = get_loss(config.training_params.loss)
     model = get_model(config.training_params, config.dataset, loss)
@@ -41,6 +59,7 @@ def GAN_Lightning(config: DictConfig):
         strategy=strategy,
         logger=logger,
         max_epochs=config.training_params.n_epochs,
+        callbacks=callbacks
     )
 
     trainer.fit(model, dataloader)

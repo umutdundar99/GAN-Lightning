@@ -26,21 +26,29 @@ class deepconv_generator_block(nn.Module):
         output_channels: int,
         stride: int = 2,
         kernel_size: int = 3,
+        final_block: bool = False,
     ):
         super(deepconv_generator_block, self).__init__()
 
-        self.block = nn.Sequential(
-            nn.ConvTranspose2d(
-                input_channels, output_channels, kernel_size=kernel_size, stride=stride,
-            ),
-            nn.BatchNorm2d(output_channels),
-            nn.ReLU(inplace=True),
-        )
+        if final_block:
+            self.block = nn.Sequential(
+                nn.ConvTranspose2d(
+                    input_channels, output_channels, kernel_size, stride
+                ),
+                nn.Tanh(),
+            )
 
-        self.final_block = nn.Sequential(
-            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride),
-            nn.Tanh(),
-        )
+        else:
+            self.block = nn.Sequential(
+                nn.ConvTranspose2d(
+                    input_channels,
+                    output_channels,
+                    kernel_size=kernel_size,
+                    stride=stride,
+                ),
+                nn.BatchNorm2d(output_channels),
+                nn.ReLU(inplace=True),
+            )
 
-    def forward(self, x: torch.Tensor, is_final: bool = False):
-        return self.final_block(x) if is_final else self.block(x)
+    def forward(self, x: torch.Tensor):
+        return self.block(x)
