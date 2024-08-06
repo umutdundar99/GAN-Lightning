@@ -3,7 +3,7 @@ import torch
 from torch import nn
 
 from typing import Dict, Any, List, Optional
-from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
+from gan_lightning.utils import get_optimizer
 from gan_lightning.src.models import model_registration
 from gan_lightning.src.models.blocks.classifier_blocks import *
 

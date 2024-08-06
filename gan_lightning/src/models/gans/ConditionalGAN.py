@@ -8,7 +8,7 @@ from gan_lightning.src.models.discriminators.deepconv_discriminator import (
 )
 
 from gan_lightning.src.models.generators.deepconv_generator import DeepConv_Generator
-from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
+from gan_lightning.utils import get_optimizer
 from gan_lightning.utils.noise import create_noise
 from gan_lightning.src.models import model_registration
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT

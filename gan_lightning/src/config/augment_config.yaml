@@ -1,29 +1,32 @@
 Normalize:
+  enabled: True
   always_apply: True
   mean: [0.5]
   std: [0.5]
   p: 1.0
 Resize:
+  enabled: True
   always_apply: True
   height: 64
   width: 64
   p:  1.0
 RandomBrightnessContrast:
-  always_apply : True
-  p: 0.3
-RandomContrast:
+  enabled: False
   always_apply : True
   p: 0.3
 ElasticTransform:
+  enabled: False
   always_apply : False
   alpha: 10
   sigma: 10
   mask_value: None
-  p: 0.0
+  p: 0.5
 ImageCompression:
-  always_apply : True
+  enabled: False
+  always_apply : False
   p: 0.3
 CenterCrop:
+  enabled: True
   always_apply: True
   height: 64
   width: 64

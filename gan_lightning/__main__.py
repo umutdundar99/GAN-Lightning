@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 from omegaconf import DictConfig
 from pytorch_lightning.accelerators.cuda import CUDAAccelerator
 from pytorch_lightning.strategies.ddp import DDPStrategy
-from gan_lightning.utils.losses.get_loss import get_loss
+from gan_lightning.utils import get_loss
 from gan_lightning.src.models.get_model import get_model
 from gan_lightning.input.utils.get_dataloader import get_dataloader
 from lightning.pytorch.loggers import MLFlowLogger
@@ -29,6 +29,7 @@ def GAN_Lightning(config: DictConfig):
         run_name=config.logger.run_name,
         log_model=config.logger.log_model,
         tracking_uri="http://localhost:5000",
+        tags=config.logger.tags,
     )
 
     callbacks = []

@@ -22,8 +22,8 @@ training_params:
     input_size: 28 # set it to 28 for mnist and 32 for cifar10
     pretrained: false
   loss:
-    discriminator_loss: BasicDiscLoss
-    generator_loss: BasicGenLoss
+    discriminator_loss: None
+    generator_loss: None
     classifier_loss: BCEWithLogitsLoss
   optimizer:
     optimizer_name: adam

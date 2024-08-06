@@ -7,7 +7,7 @@ from gan_lightning.src.models.discriminators.simple_discriminator import (
     Simple_Discriminator,
 )
 from gan_lightning.src.models.generators.simple_generator import Simple_Generator
-from gan_lightning.utils.optimizers.get_optimizer import get_optimizer
+from gan_lightning.utils import get_optimizer
 from gan_lightning.utils.noise import create_noise
 from gan_lightning.src.models import model_registration
 from pytorch_lightning.utilities.types import EPOCH_OUTPUT

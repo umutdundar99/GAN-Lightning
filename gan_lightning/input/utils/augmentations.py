@@ -13,7 +13,12 @@ class GAN_Augmentation:
 
     def decompose_config(self):
         config = OmegaConf.load(self.config_dir)
-        augmentation_names = [aug for aug in config.keys()]
+        augmentation_names = []
+        for key, value in config.items():
+            if value["enabled"]:
+                augmentation_names.append(key)
+
+
         assert len(augmentation_names) > 0, "No Augmentations Found"
         self.augmentations = [getattr(A, aug) for aug in augmentation_names]
         for aug in self.augmentations:
