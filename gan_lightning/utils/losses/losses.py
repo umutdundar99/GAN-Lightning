@@ -43,7 +43,7 @@ class BasicDiscLoss(torch.nn.Module):
         discriminator: nn.Module,
         input_dim: int,
         device: str,
-        loss: nn.Module = BCEWithLogitsLoss (),
+        loss: nn.Module = BCEWithLogitsLoss(),
     ):
         super().__init__()
         self.generator = generator

@@ -35,7 +35,7 @@ training_params:
 logger:
   tool: mlflow
   experiment_name: Controllable_GAN
-  run_name: Controllable_GAN
+  run_name: ControllableGAN
   tracking_uri: localhost:5000
   tags: experimental
   log_model: all

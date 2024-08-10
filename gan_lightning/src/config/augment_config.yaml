@@ -5,10 +5,10 @@ Normalize:
   std: [0.5]
   p: 1.0
 Resize:
-  enabled: True
+  enabled: False
   always_apply: True
-  height: 64
-  width: 64
+  height: 28
+  width: 28
   p:  1.0
 RandomBrightnessContrast:
   enabled: False
@@ -26,7 +26,7 @@ ImageCompression:
   always_apply : False
   p: 0.3
 CenterCrop:
-  enabled: True
+  enabled: False
   always_apply: True
   height: 64
   width: 64

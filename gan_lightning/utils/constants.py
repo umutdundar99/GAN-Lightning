@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -22,5 +22,5 @@ class num_classes:
 @dataclass
 class Constants:
     augment_config_dir: str = "gan_lightning/src/config/augment_config.yaml"
-    img_channel: img_channel = img_channel()
-    num_classes: num_classes = num_classes()
+    img_channel: img_channel = field(default_factory=img_channel)
+    num_classes: num_classes = field(default_factory=num_classes)

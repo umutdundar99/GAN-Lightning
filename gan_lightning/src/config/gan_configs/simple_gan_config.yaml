@@ -8,7 +8,6 @@ dataset:
   train: true
   pin_memory: true
   batch_size: 128
-  num_classes: 40
 training_params:
   n_epochs: 150
   display_step: 500
@@ -17,7 +16,7 @@ training_params:
   weight_init_name: normal
   checkpoint_dir: checkpoints/
   model:
-    input_dim: 100
+    input_dim: 64
     architecture: SimpleGAN
     input_size: 28 # set it to 28 for mnist and 32 for cifar10
     pretrained: false
@@ -29,7 +28,7 @@ training_params:
     lr: 0.001
     scheduler:
       scheduler_name: StepLR
-      step_size: 25
+      step_size: 50
       gamma: 0.5
 logger:
   tool: mlflow
