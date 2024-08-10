@@ -28,4 +28,5 @@ mlruns/
 #data
 ```
 data/
+img_align_celeba/
 ```

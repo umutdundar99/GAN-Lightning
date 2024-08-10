@@ -80,8 +80,6 @@ class CELEBADataModule(LightningDataModule):
         self.dims = (1, 64, 64)
         self.num_classes = 40
 
-        
-    
     def setup(self, stage=None):
         # Assign train/val datasets for use in dataloaders
         if stage == "fit" or stage is None:

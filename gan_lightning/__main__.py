@@ -1,28 +1,18 @@
-import hydra
 import os
 import time
 import pytorch_lightning as pl
 from omegaconf import DictConfig
-from pytorch_lightning.accelerators.cuda import CUDAAccelerator
-from pytorch_lightning.strategies.ddp import DDPStrategy
 from gan_lightning.utils import get_loss
 from gan_lightning.src.models.get_model import get_model
 from gan_lightning.input.utils.get_dataloader import get_dataloader
 from lightning.pytorch.loggers import MLFlowLogger
+import logging
 
+info_logger = logging.getLogger(__name__)
 
-@hydra.main(config_path="src/config", config_name="config", version_base=None)
 def GAN_Lightning(config: DictConfig):
     if config.training_params.accelerator == "gpu":
-        devices = CUDAAccelerator.parse_devices(
-            config.training_params.device_num
-        )  # noqa
-        if len(devices) > 1:
-            strategy = DDPStrategy(find_unused_parameters=False)
-        else:
-            strategy = None
-    else:
-        strategy = None
+        devices = [0]
 
     logger = MLFlowLogger(
         experiment_name=config.logger.experiment_name,
@@ -44,20 +34,20 @@ def GAN_Lightning(config: DictConfig):
     
     RichProgressBar = pl.callbacks.RichProgressBar()
     
-    
-    
     callbacks.append(RichProgressBar)
     callbacks.append(checkpoint_callback)
 
     loss = get_loss(config.training_params.loss)
+    info_logger.info(f"Using loss function {loss}")
+
     model = get_model(config.training_params, config.dataset, loss)
     dataloader = get_dataloader(config.dataset)
-    # TODO: Get it from a dataloader.py file
+    info_logger.info(f"Using dataset {config.dataset.name}")
+    info_logger.info(f"Devices: {devices}")    
 
     trainer = pl.Trainer(
         accelerator=config.training_params.accelerator,
         devices=devices,
-        strategy=strategy,
         logger=logger,
         max_epochs=config.training_params.n_epochs,
         callbacks=callbacks
@@ -67,6 +57,16 @@ def GAN_Lightning(config: DictConfig):
 
     return model
 
-
 if __name__ == "__main__":
-    GAN_Lightning()
+    
+    import argparse
+    from hydra import compose, initialize
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--gan_name", type=str, choices=["conditional_gan", "controllable_gan", "deepconv_gan", "simple_gan", "wgan"], default="simple_gan")
+    args = parser.parse_args()
+
+    initialize(config_path="src/config/gan_configs", version_base=None)
+    config_name = f"{args.gan_name}_config"
+    cfg = compose(config_name=config_name)
+    GAN_Lightning(cfg)
