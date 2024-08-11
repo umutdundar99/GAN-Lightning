@@ -27,11 +27,10 @@ class WGAN(LightningModule):
         **kwargs,
     ):
         super().__init__()
-        if  mode == "train":
+        if mode == "train":
             self._init_training(training_config, optimizer_dict, dataset_config, losses)
         elif mode == "eval":
             self._init_eval(kwargs["input_dim"])
-        
 
     def forward(self, x: torch.Tensor):
         return self.G(x)
@@ -99,7 +98,13 @@ class WGAN(LightningModule):
         for key, value in config.items():
             setattr(self, key, value)
 
-    def _init_training(self, training_config: Dict[str, Any], optimizer_dict: Dict[str, Any], dataset_config: Dict[str, Any], losses: Dict[str, Any]):
+    def _init_training(
+        self,
+        training_config: Dict[str, Any],
+        optimizer_dict: Dict[str, Any],
+        dataset_config: Dict[str, Any],
+        losses: Dict[str, Any],
+    ):
         self.set_attributes(training_config)
         self.G = DeepConv_Generator(input_dim=self.input_dim, hidden_dim=64)
         self.G.weight_init(training_config["weight_init_name"])
@@ -119,6 +124,6 @@ class WGAN(LightningModule):
             self.discriminator_loss.__name__ == "WDiscLoss"
         ), "Discriminator loss must be WDiscLoss for this specific model"  # noqa
         self.automatic_optimization = False
-        
-    def _init_eval(self,input_dim: int):
+
+    def _init_eval(self, input_dim: int):
         self.G = DeepConv_Generator(input_dim=self.input_dim, hidden_dim=64)

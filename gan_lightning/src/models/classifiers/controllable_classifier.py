@@ -22,17 +22,17 @@ class Controllable_Classifier(LightningModule):
         **kwargs,
     ):
         super(Controllable_Classifier, self).__init__()
-       
+
         self.img_channel = img_channel
         self.down_sampling = DownSamplingBlock(self.img_channel, hidden_dim, stride=2)
 
         self.mobilenetv2_feature_extractor = Mobilenetv2_Feature_Extractor(
             in_channels=hidden_dim * 2
         )
-        
+
         self.num_classes = num_classes
         self.classifier_head = ClassificationHead(hidden_dim * 6, num_classes)
-        
+
         if mode == "train":
             self.set_attributes(training_config)
             self.weight_init(training_config["weight_init_name"])
@@ -80,7 +80,9 @@ class Controllable_Classifier(LightningModule):
             run_id=self.logger.run_id, key="val_loss", value=val_loss
         )
         self.log("val_loss", val_loss, prog_bar=True)
-        self.log("val_multi_label_accuracy", self.val_multi_label_accuracy, prog_bar=True)
+        self.log(
+            "val_multi_label_accuracy", self.val_multi_label_accuracy, prog_bar=True
+        )
         return val_loss
 
     def validation_epoch_end(self, outputs):

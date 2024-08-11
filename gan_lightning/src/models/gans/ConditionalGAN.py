@@ -32,8 +32,9 @@ class ConditionalGAN(LightningModule):
         if mode == "train":
             self._init_training(training_config, optimizer_dict, dataset_config, losses)
         elif mode == "eval":
-            self._init_eval(kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"])
-        
+            self._init_eval(
+                kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"]
+            )
 
     def forward(self, x: torch.Tensor):
         return self.G(x)
@@ -151,6 +152,8 @@ class ConditionalGAN(LightningModule):
         self.g_loss = self.generator_loss()
         self.batcch_size = dataset_config.get("batch_size", 128)
         self.automatic_optimization = False
-        
+
     def _init_eval(self, input_dim: int, img_channel: int, input_size: int):
-        self.G = DeepConv_Generator(input_dim=input_dim, img_channel=img_channel, input_size=input_size)
+        self.G = DeepConv_Generator(
+            input_dim=input_dim, img_channel=img_channel, input_size=input_size
+        )

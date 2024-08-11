@@ -37,6 +37,8 @@ def GAN_Lightning(config: DictConfig):
     ):
         os.makedirs(os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month))
 
+    monitor = "train_loss" if config.training_params.monitor == "train" else "val_loss"
+
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
         monitor="train_loss",
         dirpath=os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month),

@@ -5,12 +5,15 @@ from onnxsim import simplify
 from gan_lightning.src.models import registered_models
 
 
+def export_model(
+    model: str, ckpt_path: str, input_dim: int, img_channel: int, input_size: int
+):
 
-def export_model(model:str, ckpt_path:str, input_dim:int, img_channel:int, input_size:int):
-    
-    export_kwargs = {"input_dim":input_dim,
-                    "img_channel":img_channel,
-                    "input_size": input_size}
+    export_kwargs = {
+        "input_dim": input_dim,
+        "img_channel": img_channel,
+        "input_size": input_size,
+    }
 
     model = registered_models[model]
     model = model(mode="eval", **export_kwargs)
@@ -18,8 +21,14 @@ def export_model(model:str, ckpt_path:str, input_dim:int, img_channel:int, input
     model.load_state_dict(state_dict, strict=False)
     model.eval()
     dummy_input = torch.randn(1, input_dim)
-    torch.onnx.export(model, dummy_input, f"{model.get_name()}.onnx", input_names=["input"], output_names=["output"])
-    
+    torch.onnx.export(
+        model,
+        dummy_input,
+        f"{model.get_name()}.onnx",
+        input_names=["input"],
+        output_names=["output"],
+    )
+
     # simplify onnx model
     onnx_model = onnx.load(f"{model.get_name()}.onnx")
     simplified_model, check = simplify(onnx_model)

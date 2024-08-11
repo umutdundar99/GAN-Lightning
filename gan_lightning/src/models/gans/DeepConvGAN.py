@@ -15,7 +15,6 @@ from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 from gan_lightning.utils.constants import Constants
 
 
-
 @model_registration("DeepConvGAN")
 class DeepConvGAN(LightningModule):
     def __init__(
@@ -28,11 +27,13 @@ class DeepConvGAN(LightningModule):
         **kwargs,
     ):
         super().__init__()
-        
+
         if mode == "train":
             self._init_training(training_config, optimizer_dict, dataset_config, losses)
         elif mode == "eval":
-            self._init_eval(kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"])
+            self._init_eval(
+                kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"]
+            )
 
     def forward(self, x: torch.Tensor):
         return self.G(x)
@@ -61,9 +62,9 @@ class DeepConvGAN(LightningModule):
         return train_loss
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
-        
+
         if self.current_epoch % 2 == 0:
-            
+
             noise = create_noise(self.batch_size, self.input_dim)
             generated_images = self(noise)
             for enum, img in enumerate(generated_images):
@@ -95,9 +96,17 @@ class DeepConvGAN(LightningModule):
     def _init_training(self, config, optimizer_dict, dataset_config, losses):
         constants = Constants()
         self.set_attributes(config)
-        self.img_channel = getattr(constants.IMG_CHANNEL, dataset_config["name"].upper())
-        self.G = DeepConv_Generator(input_dim=self.input_dim, img_channel=self.img_channel, input_size=self.input_size)
-        self.D = DeepConv_Discriminator(img_channel=self.img_channel, input_size=self.input_size)
+        self.img_channel = getattr(
+            constants.IMG_CHANNEL, dataset_config["name"].upper()
+        )
+        self.G = DeepConv_Generator(
+            input_dim=self.input_dim,
+            img_channel=self.img_channel,
+            input_size=self.input_size,
+        )
+        self.D = DeepConv_Discriminator(
+            img_channel=self.img_channel, input_size=self.input_size
+        )
         self.G.weight_init(config["weight_init_name"])
         self.D.weight_init(config["weight_init_name"])
         self.optimizer_dict = optimizer_dict
@@ -112,9 +121,11 @@ class DeepConvGAN(LightningModule):
         )
 
         self.automatic_optimization = False
-        
+
     def _init_eval(self, input_dim: int, img_channel: int, input_size: int):
-        self.G = DeepConv_Generator(input_dim=input_dim, img_channel=img_channel, input_size=input_size)
-         
+        self.G = DeepConv_Generator(
+            input_dim=input_dim, img_channel=img_channel, input_size=input_size
+        )
+
     def get_name(self):
         return "DeepConvGAN"

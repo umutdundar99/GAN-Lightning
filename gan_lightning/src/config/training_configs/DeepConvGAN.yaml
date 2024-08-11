@@ -16,6 +16,7 @@ training_params:
   accelerator: gpu
   weight_init_name: normal
   checkpoint_dir: checkpoints/
+  monitor: train
   model:
     input_dim: 128
     architecture: DeepConvGAN

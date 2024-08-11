@@ -16,10 +16,11 @@ training_params:
   accelerator: gpu
   weight_init_name: normal
   checkpoint_dir: checkpoints/
+  monitor: val
   model:
     input_dim: 64
     architecture: Controllable_Classifier
-    input_size: 28 # set it to 28 for mnist and 32 for cifar10
+    input_size: 64 # set it to 28 for mnist and 32 for cifar10
     pretrained: false
   loss:
     discriminator_loss: None

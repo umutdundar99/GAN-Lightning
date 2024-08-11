@@ -37,16 +37,16 @@ if __name__ == "__main__":
         type=str,
         default=None,
         nargs="+",
-        help="Path to the checkpoint file for export mode"
+        help="Path to the checkpoint file for export mode",
     )
-    
+
     parser.add_argument(
         "--input-dim",
         type=int,
         default=128,
         help="Dimension of the noise vector for export and eval mode",
     )
-    
+
     parser.add_argument(
         "--img-channel",
         type=int,
@@ -59,16 +59,14 @@ if __name__ == "__main__":
         default=28,
         help="Size of the input image for export and eval mode",
     )
-    
+
     parser.add_argument(
         "--onnx-path",
         type=str,
         default=None,
         help="Path to the onnx file for evaluation mode, if the model is Controllable_Classifier, firstly provide the path to the classifier onnx and then the generator onnx file path, provide only one path for the rest of the models",
     )
-    
-    
-    
+
     args = parser.parse_args()
 
     if args.mode == "eval":
@@ -89,11 +87,13 @@ if __name__ == "__main__":
         config_name = f"{args.model}"
         cfg = compose(config_name=config_name)
         GAN_Lightning(cfg)
-    
+
     elif args.mode == "export":
-        
-        export_model(args.model, 
-                     args.ckpt_path[0], 
-                     input_dim = args.input_dim,
-                    img_channel = args.img_channel,
-                    input_size = args.input_size )
+
+        export_model(
+            args.model,
+            args.ckpt_path[0],
+            input_dim=args.input_dim,
+            img_channel=args.img_channel,
+            input_size=args.input_size,
+        )

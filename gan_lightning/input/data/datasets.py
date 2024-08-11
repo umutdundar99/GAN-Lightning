@@ -32,10 +32,10 @@ class CelebaDataset(Dataset):
 
         img_path = os.path.join(self.img_dir, self.image_files[idx])
         image = cv2.imread(img_path)
-    
+
         if self.transform:
             image = self.transform(image)
-        
+
         image = image.transpose((2, 0, 1))
 
         labels = torch.tensor(self.attributes.iloc[idx].values, dtype=torch.float32)

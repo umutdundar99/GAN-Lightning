@@ -28,9 +28,9 @@ class SimpleGAN(LightningModule):
         if mode == "train":
             self._init_training(training_config, optimizer_dict, dataset_config, losses)
         elif mode == "eval":
-            self._init_eval(kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"])
-            
-        
+            self._init_eval(
+                kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"]
+            )
 
     def forward(self, x: torch.Tensor):
         return self.G(x)
@@ -112,7 +112,7 @@ class SimpleGAN(LightningModule):
             self.G, self.D, self.input_dim, self.device_num
         )
         self.automatic_optimization = False
-        
+
     def _init_eval(self, input_dim: int, img_channel: int, input_size: int):
 
         self.G = Simple_Generator(input_dim=self.input_dim)
