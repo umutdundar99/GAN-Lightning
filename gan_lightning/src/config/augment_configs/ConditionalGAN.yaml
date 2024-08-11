@@ -1,5 +1,5 @@
 Normalize:
-  enabled: True
+  enabled: False
   always_apply: True
   mean: [0.5]
   std: [0.5]

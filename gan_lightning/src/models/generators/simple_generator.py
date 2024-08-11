@@ -6,6 +6,7 @@ from gan_lightning.src.models.blocks.generator_blocks import (
 
 from gan_lightning.src.models import model_registration
 
+
 @model_registration("Simple_Generator")
 class Simple_Generator(pl.LightningModule):
     def __init__(self, input_dim=10, img_channel=784, hidden_dim=128, **kwargs):

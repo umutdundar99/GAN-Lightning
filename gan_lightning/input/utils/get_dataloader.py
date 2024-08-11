@@ -4,11 +4,11 @@ from gan_lightning.input import registered_dataloaders
 import inspect
 
 
-def get_dataloader(config, **kwargs):
+def get_dataloader(config, transforms, **kwargs):
     config = OmegaConf.to_container(config)
     dataloader = registered_dataloaders[config["name"].lower()]
     config = recompose_config(dataloader, config)
-    dataloader = dataloader(**config, **kwargs)
+    dataloader = dataloader(**config, transform=transforms)
     return dataloader
 
 

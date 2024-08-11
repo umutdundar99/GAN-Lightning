@@ -10,19 +10,34 @@ from gan_lightning.src.models import model_registration
 
 @model_registration("Deep_Convolutional_Discriminator")
 class DeepConv_Discriminator(pl.LightningModule):
-    def __init__(self, img_channel: int = 1, hidden_dim: int = 16, **kwargs):
+    def __init__(self, img_channel: int = 1, hidden_dim: int = 32, input_size:int = 28, **kwargs):
         super().__init__()
+        
+        input_size = 64
+        if input_size ==28:
+            kernel = [3,4,4,4,4]
+            stride = [2,2,2,2,2]
+            padding = [2,2,2,2,0]
+            
+        elif input_size == 64:
+            kernel = [3,3,3,3,3]
+            stride = [2,2,2,2,2]
+            padding = [1,1,1,1,0]
+        else:
+            raise ValueError("Invalid input size")
+        
+        
         self.discriminator = nn.Sequential(
             deepconv_discriminator_block(
-                img_channel, hidden_dim, padding=2, kernel_size=3
+                img_channel, hidden_dim, stride=stride[0], kernel_size=kernel[0], padding=padding[0]
             ),
-            deepconv_discriminator_block(hidden_dim, hidden_dim * 2, padding=2),
-            deepconv_discriminator_block(hidden_dim * 2, hidden_dim * 4, padding=2),
-            deepconv_discriminator_block(hidden_dim * 4, hidden_dim * 2, padding=2),
+            deepconv_discriminator_block(hidden_dim, hidden_dim * 2, stride=stride[1], kernel_size=kernel[1], padding=padding[1]),
+            deepconv_discriminator_block(hidden_dim * 2, hidden_dim * 4, stride=stride[2], kernel_size=kernel[2], padding=padding[2]),
+            deepconv_discriminator_block(hidden_dim * 4, hidden_dim * 2, stride=stride[3], kernel_size=kernel[3], padding=padding[3]),
         )
 
         self.final_block = deepconv_discriminator_block(
-            hidden_dim * 2, 1, final_block=True
+            hidden_dim * 2, 1, stride=stride[4], kernel_size=kernel[4], padding=padding[4], final_block=True
         )
 
     def forward(self, x: torch.Tensor):

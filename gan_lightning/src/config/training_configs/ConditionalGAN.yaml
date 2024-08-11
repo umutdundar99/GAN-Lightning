@@ -1,6 +1,6 @@
 dataset:
-  name: celeba
-  data_dir: data/celeba
+  name: mnist
+  data_dir: data/mnist
   num_workers: 12
   normalize: true
   download: true
@@ -10,7 +10,7 @@ dataset:
   batch_size: 128
   num_classes: 40
 training_params:
-  n_epochs: 50
+  n_epochs: 250
   display_step: 500
   device_num: [0]
   accelerator: gpu
@@ -18,13 +18,12 @@ training_params:
   checkpoint_dir: checkpoints/
   model:
     input_dim: 64
-    architecture: Controllable_Classifier
+    architecture: ConditionalGAN
     input_size: 28 # set it to 28 for mnist and 32 for cifar10
     pretrained: false
   loss:
-    discriminator_loss: None
-    generator_loss: None
-    classifier_loss: BCEWithLogitsLoss
+    discriminator_loss: BCE
+    generator_loss: BCE
   optimizer:
     optimizer_name: adam
     lr: 0.001
@@ -34,8 +33,8 @@ training_params:
       gamma: 0.5
 logger:
   tool: mlflow
-  experiment_name: Controllable_GAN
-  run_name: Controllable_GAN
+  experiment_name: ConditionalGAN
+  run_name: ConditionalGAN
   tracking_uri: localhost:5000
   tags: experimental
   log_model: all

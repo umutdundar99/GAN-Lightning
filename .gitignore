@@ -16,6 +16,7 @@ model.pth
 black.toml
 requirements.txt
 imgs
+models*
 .vscode
 
 ```
@@ -29,4 +30,9 @@ mlruns/
 ```
 data/
 img_align_celeba/
+```
+
+#outputs
+```
+generated_images*
 ```

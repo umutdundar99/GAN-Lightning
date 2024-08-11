@@ -1,6 +1,6 @@
 dataset:
-  name: MNIST
-  data_dir: data/mnist
+  name: celeba
+  data_dir: data/celeba
   num_workers: 12
   normalize: true
   download: true
@@ -17,20 +17,20 @@ training_params:
   weight_init_name: normal
   checkpoint_dir: checkpoints/
   model:
-    input_dim: 64
-    architecture: DeepConv
-    input_size: 28 # set it to 28 for mnist and 32 for cifar10
+    input_dim: 128
+    architecture: DeepConvGAN
+    input_size: 64 # set it to 28 for mnist and 32 for cifar10
     pretrained: false
   loss:
-    discriminator_loss: BCE
-    generator_loss: BCE
+    discriminator_loss: BasicDiscLoss
+    generator_loss: BasicGenLoss
   optimizer:
     optimizer_name: adam
-    lr: 0.001
+    lr: 0.0002
     scheduler:
       scheduler_name: StepLR
       step_size: 25
-      gamma: 0.5
+      gamma: 1.0
 logger:
   tool: mlflow
   experiment_name: DeepConv

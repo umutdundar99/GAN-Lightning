@@ -1,6 +1,7 @@
 import torch
 import cv2
 import os
+import numpy as np
 from typing import Dict, Any, List, Optional
 from pytorch_lightning import LightningModule
 from gan_lightning.src.models.discriminators.deepconv_discriminator import (
@@ -20,32 +21,19 @@ from gan_lightning.utils.constants import Constants
 class ConditionalGAN(LightningModule):
     def __init__(
         self,
-        losses: Dict[str, Any],
-        optimizer_dict: Dict[str, Any],
+        losses: Optional[Dict[str, Any]] = None,
+        optimizer_dict: Optional[Dict[str, Any]] = None,
         training_config: Optional[Dict[str, Any]] = None,
         dataset_config: Optional[Dict[str, Any]] = None,
+        mode: Optional[str] = "train",
         **kwargs,
     ):
         super().__init__()
-        img_channel = getattr(Constants.img_channel, dataset_config["name"])
-        self.num_classes = getattr(Constants.num_classes, dataset_config["name"])
-        self.input_dim = training_config["input_dim"]
-        self.input_dim, self.img_channel = self.set_input_dim(
-            self.input_dim, img_channel, self.num_classes
-        )
-        self.G = DeepConv_Generator(input_dim=self.input_dim)
-        self.G.weight_init(training_config["weight_init_name"])
-        self.D = DeepConv_Discriminator(
-            img_channel=self.img_channel, hidden_dim=training_config["input_dim"]
-        )
-        self.D.weight_init(training_config["weight_init_name"])
-        self.optimizer_dict = optimizer_dict
-        self.set_attributes(training_config)
-        self.discriminator_loss = losses.get("discriminator_loss", None)
-        self.d_loss = self.discriminator_loss()
-        self.generator_loss = losses.get("generator_loss", None)
-        self.g_loss = self.generator_loss()
-        self.automatic_optimization = False
+        if mode == "train":
+            self._init_training(training_config, optimizer_dict, dataset_config, losses)
+        elif mode == "eval":
+            self._init_eval(kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"])
+        
 
     def forward(self, x: torch.Tensor):
         return self.G(x)
@@ -53,7 +41,6 @@ class ConditionalGAN(LightningModule):
     def training_step(self, batch: List[torch.Tensor]):
         gen_opt, disc_opt = self.optimizers()
         X, y = batch
-        X = X.unsqueeze(1)
         batch_size = X.shape[0]
         one_hot_labels = F.one_hot(y, num_classes=self.num_classes)
         y = one_hot_labels[:, :, None, None]
@@ -89,12 +76,14 @@ class ConditionalGAN(LightningModule):
 
         self.log("discriminator_loss", disc_loss, prog_bar=True)
         self.log("generator_loss", gen_loss, prog_bar=True)
-        return disc_loss + gen_loss
+        self.log("train_loss", disc_loss + gen_loss, prog_bar=True)
+        train_loss = disc_loss + gen_loss
+        return train_loss
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
-        noise = create_noise(40, self.input_dim)
-        y = 8
-        one_hot_labels = F.one_hot(torch.tensor([y] * 40), num_classes=10).to(
+        noise = create_noise(20, self.input_dim)
+        y = np.random.randint(0, 10)
+        one_hot_labels = F.one_hot(torch.tensor([y] * 20), num_classes=10).to(
             self.device
         )
         noise = torch.cat((noise, one_hot_labels), dim=1)
@@ -105,7 +94,7 @@ class ConditionalGAN(LightningModule):
                 image = image.transpose(1, 2, 0)
                 image = (image + 1) / 2
                 epoch = str(self.current_epoch)
-                path = os.path.join("generated_images", f"epoch_{epoch}")
+                path = os.path.join("generated_images-ConditionalGAN", f"epoch_{epoch}")
                 if not os.path.exists(path):
                     os.makedirs(path)
                 cv2.imwrite(
@@ -131,3 +120,37 @@ class ConditionalGAN(LightningModule):
         discriminator_im_chan = input_shape + num_classes
 
         return generator_input_dim, discriminator_im_chan
+
+    def _init_training(
+        self,
+        training_config: Dict[str, Any],
+        optimizer_dict: Dict[str, Any],
+        dataset_config: Dict[str, Any],
+        losses: Dict[str, Any],
+    ):
+        constants = Constants()
+        img_channel = getattr(constants.IMG_CHANNEL, dataset_config["name"].upper())
+        self.num_classes = getattr(
+            constants.NUM_CLASSES, dataset_config["name"].upper()
+        )
+        self.input_dim = training_config["input_dim"]
+        self.input_dim, self.img_channel = self.set_input_dim(
+            self.input_dim, img_channel, self.num_classes
+        )
+        self.G = DeepConv_Generator(input_dim=self.input_dim)
+        self.G.weight_init(training_config["weight_init_name"])
+        self.D = DeepConv_Discriminator(
+            img_channel=self.img_channel, hidden_dim=training_config["input_dim"]
+        )
+        self.D.weight_init(training_config["weight_init_name"])
+        self.optimizer_dict = optimizer_dict
+        self.set_attributes(training_config)
+        self.discriminator_loss = losses.get("discriminator_loss", None)
+        self.d_loss = self.discriminator_loss()
+        self.generator_loss = losses.get("generator_loss", None)
+        self.g_loss = self.generator_loss()
+        self.batcch_size = dataset_config.get("batch_size", 128)
+        self.automatic_optimization = False
+        
+    def _init_eval(self, input_dim: int, img_channel: int, input_size: int):
+        self.G = DeepConv_Generator(input_dim=input_dim, img_channel=img_channel, input_size=input_size)

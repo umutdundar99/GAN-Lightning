@@ -18,8 +18,6 @@ class GAN_Augmentation:
             if value["enabled"]:
                 augmentation_names.append(key)
 
-
-        assert len(augmentation_names) > 0, "No Augmentations Found"
         self.augmentations = [getattr(A, aug) for aug in augmentation_names]
         for aug in self.augmentations:
             aug_params = config[aug.__name__]

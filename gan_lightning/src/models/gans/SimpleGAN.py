@@ -17,27 +17,20 @@ from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 class SimpleGAN(LightningModule):
     def __init__(
         self,
-        losses: Dict[str, Any],
-        optimizer_dict: Dict[str, Any],
+        losses: Optional[Dict[str, Any]] = None,
+        optimizer_dict: Optional[Dict[str, Any]] = None,
         training_config: Optional[Dict[str, Any]] = None,
         dataset_config: Optional[Dict[str, Any]] = None,
+        mode: Optional[str] = "train",
         **kwargs,
     ):
         super().__init__()
-        self.set_attributes(training_config)
-        self.G = Simple_Generator(input_dim=self.input_dim)
-        self.D = Simple_Discriminator()
-        self.optimizer_dict = optimizer_dict
-
-        self.discriminator_loss = losses.get("discriminator_loss", None)
-        self.d_loss = self.discriminator_loss(
-            self.G, self.D, self.input_dim, self.device_num
-        )
-        self.generator_loss = losses.get("generator_loss", None)
-        self.g_loss = self.generator_loss(
-            self.G, self.D, self.input_dim, self.device_num
-        )
-        self.automatic_optimization = False
+        if mode == "train":
+            self._init_training(training_config, optimizer_dict, dataset_config, losses)
+        elif mode == "eval":
+            self._init_eval(kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"])
+            
+        
 
     def forward(self, x: torch.Tensor):
         return self.G(x)
@@ -62,23 +55,28 @@ class SimpleGAN(LightningModule):
         # log the losses
         self.log("discriminator_loss", disc_loss, prog_bar=True)
         self.log("generator_loss", gen_loss, prog_bar=True)
-        return disc_loss + gen_loss
+        self.log("train_loss", disc_loss + gen_loss, prog_bar=True)
+        train_loss = disc_loss + gen_loss
+        return train_loss
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         noise = create_noise(self.batch_size, self.input_dim)
         generated_images = self(noise)
         generated_images = generated_images.view(-1, 28, 28)
 
-        for enum, img in enumerate(generated_images):
-            image = img.cpu().detach().numpy()
-            epoch = str(self.current_epoch)
-            path = os.path.join("generated_images", f"epoch_{epoch}")
-            if not os.path.exists(path):
-                os.makedirs(path)
-            cv2.imwrite(
-                os.path.join(path, f"generated_images_{enum}_.png"),
-                image * 255,
-            )
+        # if epoch % 10 == 0:
+        if self.current_epoch % 20 == 0:
+
+            for enum, img in enumerate(generated_images):
+                image = img.cpu().detach().numpy()
+                epoch = str(self.current_epoch)
+                path = os.path.join("generated_images-SimpleGAN", f"epoch_{epoch}")
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                cv2.imwrite(
+                    os.path.join(path, f"generated_images_{enum}_.png"),
+                    image * 255,
+                )
 
     def configure_optimizers(self):
         G_optimizer = get_optimizer(self.G.parameters(), self.optimizer_dict)
@@ -88,3 +86,33 @@ class SimpleGAN(LightningModule):
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():
             setattr(self, key, value)
+
+    def _init_training(
+        self,
+        training_config: Dict[str, Any],
+        optimizer_dict: Dict[str, Any],
+        dataset_config: Dict[str, Any],
+        losses: Dict[str, Any],
+    ):
+        self.set_attributes(training_config)
+        self.batch_size = dataset_config.get("batch_size", 128)
+        self.G = Simple_Generator(input_dim=self.input_dim)
+        self.D = Simple_Discriminator()
+        self.G.weight_init(training_config.get("weight_init_name"))
+        self.D.weight_init(training_config.get("weight_init_name"))
+
+        self.optimizer_dict = optimizer_dict
+
+        self.discriminator_loss = losses.get("discriminator_loss", None)
+        self.d_loss = self.discriminator_loss(
+            self.G, self.D, self.input_dim, self.device_num
+        )
+        self.generator_loss = losses.get("generator_loss", None)
+        self.g_loss = self.generator_loss(
+            self.G, self.D, self.input_dim, self.device_num
+        )
+        self.automatic_optimization = False
+        
+    def _init_eval(self, input_dim: int, img_channel: int, input_size: int):
+
+        self.G = Simple_Generator(input_dim=self.input_dim)

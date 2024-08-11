@@ -19,31 +19,19 @@ from pytorch_lightning.utilities.types import EPOCH_OUTPUT
 class WGAN(LightningModule):
     def __init__(
         self,
-        losses: Dict[str, Any],
-        optimizer_dict: Dict[str, Any],
+        losses: Optional[Dict[str, Any]] = None,
+        optimizer_dict: Optional[Dict[str, Any]] = None,
         training_config: Optional[Dict[str, Any]] = None,
         dataset_config: Optional[Dict[str, Any]] = None,
+        mode: Optional[str] = "train",
         **kwargs,
     ):
         super().__init__()
-        self.G = DeepConv_Generator(input_dim=64, hidden_dim=64)
-        self.G.weight_init(training_config["weight_init_name"])
-        self.D = DeepConv_Discriminator(hidden_dim=64)
-        self.D.weight_init(training_config["weight_init_name"])
-        self.D_train_freq = 5
-        self.optimizer_dict = optimizer_dict
-        self.set_attributes(training_config)
-        self.discriminator_loss = losses.get("discriminator_loss", None)
-        self.d_loss = self.discriminator_loss()
-        self.generator_loss = losses.get("generator_loss", None)
-        self.g_loss = self.generator_loss()
-        assert (
-            self.generator_loss.__name__ == "WGenLoss"
-        ), "Generator loss must be WGenLoss for this specific model"  # noqa
-        assert (
-            self.discriminator_loss.__name__ == "WDiscLoss"
-        ), "Discriminator loss must be WDiscLoss for this specific model"  # noqa
-        self.automatic_optimization = False
+        if  mode == "train":
+            self._init_training(training_config, optimizer_dict, dataset_config, losses)
+        elif mode == "eval":
+            self._init_eval(kwargs["input_dim"])
+        
 
     def forward(self, x: torch.Tensor):
         return self.G(x)
@@ -51,8 +39,6 @@ class WGAN(LightningModule):
     def training_step(self, batch: List[torch.Tensor]):
         gen_opt, disc_opt = self.optimizers()
         X, _ = batch
-        # add a dim to first channel
-        X = X.unsqueeze(1)
         batch_size = X.shape[0]
         for _ in range(self.D_train_freq):
             disc_opt.zero_grad()
@@ -78,7 +64,9 @@ class WGAN(LightningModule):
 
         self.log("discriminator_loss", D_loss, prog_bar=True)
         self.log("generator_loss", G_loss, prog_bar=True)
-        return G_loss + D_loss
+        self.log("train_loss", G_loss + D_loss, prog_bar=True)
+        train_loss = G_loss + D_loss
+        return train_loss
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
         noise = create_noise(40, self.input_dim)
@@ -90,7 +78,7 @@ class WGAN(LightningModule):
                 image = image.transpose(1, 2, 0)
                 image = (image + 1) / 2
                 epoch = str(self.current_epoch)
-                path = os.path.join("generated_images", f"epoch_{epoch}")
+                path = os.path.join("generated_images-WGAN", f"epoch_{epoch}")
                 if not os.path.exists(path):
                     os.makedirs(path)
                 cv2.imwrite(
@@ -110,3 +98,27 @@ class WGAN(LightningModule):
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():
             setattr(self, key, value)
+
+    def _init_training(self, training_config: Dict[str, Any], optimizer_dict: Dict[str, Any], dataset_config: Dict[str, Any], losses: Dict[str, Any]):
+        self.set_attributes(training_config)
+        self.G = DeepConv_Generator(input_dim=self.input_dim, hidden_dim=64)
+        self.G.weight_init(training_config["weight_init_name"])
+        self.D = DeepConv_Discriminator(hidden_dim=64)
+        self.D.weight_init(training_config["weight_init_name"])
+        self.D_train_freq = 5
+        self.optimizer_dict = optimizer_dict
+        self.discriminator_loss = losses.get("discriminator_loss", None)
+        self.d_loss = self.discriminator_loss()
+        self.generator_loss = losses.get("generator_loss", None)
+        self.g_loss = self.generator_loss()
+        self.batch_size = dataset_config.get("batch_size", 128)
+        assert (
+            self.generator_loss.__name__ == "WGenLoss"
+        ), "Generator loss must be WGenLoss for this specific model"  # noqa
+        assert (
+            self.discriminator_loss.__name__ == "WDiscLoss"
+        ), "Discriminator loss must be WDiscLoss for this specific model"  # noqa
+        self.automatic_optimization = False
+        
+    def _init_eval(self,input_dim: int):
+        self.G = DeepConv_Generator(input_dim=self.input_dim, hidden_dim=64)

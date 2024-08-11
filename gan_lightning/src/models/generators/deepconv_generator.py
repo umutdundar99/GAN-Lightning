@@ -4,6 +4,7 @@ from gan_lightning.src.models.blocks.generator_blocks import (
     deepconv_generator_block,
 )
 from gan_lightning.src.models import model_registration
+import math
 
 
 @model_registration("Deep_Convolutional_Generator")
@@ -11,20 +12,31 @@ class DeepConv_Generator(pl.LightningModule):
     def __init__(
         self, input_dim: int = 10, img_channel: int = 1, hidden_dim: int = 64, **kwargs
     ):
-        super().__init__()
+        super().__init__(),
+        self.input_size = kwargs.get("input_size", 28)
+        
+        if self.input_size == 64:
+            kernel = [2, 2, 2, 2, 2, 2]
+            stride = [2, 2, 2, 2, 2, 2]
+        elif self.input_size == 28:
+            kernel = [3,3,4,3,3,6]
+            stride = [1, 1, 1, 1, 1, 2 ]
+        else:
+            raise ValueError("Invalid input size")
+        
         self.input_dim = input_dim
         self.generator = nn.Sequential(
-            deepconv_generator_block(input_dim, hidden_dim * 4, stride=1),
-            deepconv_generator_block(hidden_dim * 4, hidden_dim * 8, stride=1),
+            deepconv_generator_block(input_dim, hidden_dim * 4, stride=stride[0], kernel_size=kernel[0]),
+            deepconv_generator_block(hidden_dim * 4, hidden_dim * 8, stride=stride[1], kernel_size=kernel[1]),
             deepconv_generator_block(
-                hidden_dim * 8, hidden_dim * 4, kernel_size=4, stride=1
+                hidden_dim * 8, hidden_dim * 4, stride=stride[2], kernel_size=kernel[2]
             ),
-            deepconv_generator_block(hidden_dim * 4, hidden_dim * 2, stride=1),
-            deepconv_generator_block(hidden_dim * 2, hidden_dim, stride=1),
+            deepconv_generator_block(hidden_dim * 4, hidden_dim * 2, stride=stride[3], kernel_size=kernel[3]),
+            deepconv_generator_block(hidden_dim * 2, hidden_dim, stride=stride[4], kernel_size=kernel[4]),
         )
 
         self.final_block = deepconv_generator_block(
-            hidden_dim, img_channel, kernel_size=6, final_block=True
+            hidden_dim, img_channel, stride=stride[5], kernel_size=kernel[5], final_block=True
         )
 
     # O=(I−1)×stride−2×padding+kernel_size
@@ -51,5 +63,28 @@ class DeepConv_Generator(pl.LightningModule):
                     raise ValueError("Invalid weight initialization mode")
 
             elif isinstance(m, nn.BatchNorm2d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                if mode == "normal":
+                    nn.init.normal_(m.weight, 1.0, 0.02)
+                    nn.init.constant_(m.bias, 0)
+                elif mode == "xavier":
+                    nn.init.xavier_normal_(m.weight)
+                    nn.init.constant_(m.bias, 0)
+                elif mode == "kaiming":
+                    nn.init.kaiming_normal_(m.weight)
+                    nn.init.constant_(m.bias, 0)
+                                      
+    def _calculate_kernel_stride(self, target_size, num_layers):
+
+        initial_size = 1
+        _kernel_size= []
+        _stride= []
+        
+        for i in range(num_layers):
+            output_size = math.ceil((target_size - (initial_size - 1)) / 2)
+            stride = 2  
+            kernel_size = target_size - (output_size - 1) * stride
+            
+            _kernel_size.append(kernel_size)
+            target_size = output_size
+            
+        return _kernel_size, _stride

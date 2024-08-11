@@ -33,9 +33,7 @@ __optimizers__ = [
 __schedulers__ = [StepLR]
 
 
-
 all_losses = [BCE, BasicGenLoss, BasicDiscLoss, WDiscLoss, WGenLoss, FocalLoss]
-
 
 
 def get_optimizer(model_params, optimizer_dict: str, **kwargs):
@@ -78,13 +76,11 @@ def get_optimizer(model_params, optimizer_dict: str, **kwargs):
         )
 
 
-
-
 def get_loss(loss_config: omegaconf.dictconfig.DictConfig):
     loss_dict = OmegaConf.to_container(loss_config)
     losses = {}
     for key, value in loss_dict.items():
-        if value not in [loss.__name__ for loss in all_losses] and not value=="None":
+        if value not in [loss.__name__ for loss in all_losses] and not value == "None":
             raise ValueError(f"Loss {value} not found")
         for loss in all_losses:
             if loss.__name__ == value:

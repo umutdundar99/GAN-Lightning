@@ -9,7 +9,7 @@ dataset:
   pin_memory: true
   batch_size: 128
 training_params:
-  n_epochs: 150
+  n_epochs: 41
   display_step: 500
   device_num: [0]
   accelerator: gpu
@@ -32,8 +32,8 @@ training_params:
       gamma: 0.5
 logger:
   tool: mlflow
-  experiment_name: Controllable_GAN
-  run_name: Controllable_GAN
+  experiment_name: SimpleGAN
+  run_name: SimpleGAN
   tracking_uri: localhost:5000
   tags: experimental
   log_model: all
