@@ -18,7 +18,7 @@ training_params:
   checkpoint_dir: checkpoints/
   monitor: val
   model:
-    input_dim: 64
+    input_dim: 128
     architecture: Controllable_Classifier
     input_size: 64 # set it to 28 for mnist and 32 for cifar10
     pretrained: false

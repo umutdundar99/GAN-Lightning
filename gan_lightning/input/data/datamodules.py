@@ -4,11 +4,11 @@ from pytorch_lightning import LightningDataModule
 from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader, random_split
 from gan_lightning.input import register_dataset
-from gan_lightning.utils.constants import Constants
 from gan_lightning.input.data.datasets import CelebaDataset
 from torchvision import transforms
 from typing import Optional
 from gan_lightning.input.utils.augmentations import GAN_Augmentation
+
 
 
 @register_dataset("mnist")
@@ -20,6 +20,7 @@ class MNISTDataModule(LightningDataModule):
         num_workers: int = 12,
         download: bool = True,
         transform: Optional[GAN_Augmentation] = None,
+        input_size: int = 28,
     ):
         super().__init__()
         self.data_dir = data_dir
@@ -28,7 +29,7 @@ class MNISTDataModule(LightningDataModule):
         self.download = download
         self.transform = transform
 
-        self.dims = (1, 28, 28)
+        self.dims = (input_size, input_size)
         self.num_classes = 10
 
     def prepare_data(self):
@@ -80,6 +81,7 @@ class CELEBADataModule(LightningDataModule):
         num_workers: int = 12,
         download: bool = True,
         transform: Optional[GAN_Augmentation] = None,
+        input_size: int = 64,
     ):
         super().__init__()
         self.data_dir = data_dir
@@ -88,7 +90,7 @@ class CELEBADataModule(LightningDataModule):
         self.download = download
         self.transform = self._handle_augmentations(transform)
 
-        self.dims = (1, 64, 64)
+        self.input_size = (input_size, input_size)
         self.num_classes = 40
 
     def setup(self, stage=None):
@@ -99,6 +101,7 @@ class CELEBADataModule(LightningDataModule):
                 img_dir=os.path.join(self.data_dir, "img_align_celeba"),
                 transform=self.transform,
                 subset="train",
+                input_size=self.input_size,
             )
 
             self.val_dataset = CelebaDataset(
@@ -106,6 +109,7 @@ class CELEBADataModule(LightningDataModule):
                 img_dir=os.path.join(self.data_dir, "img_align_celeba"),
                 transform=self.transform,
                 subset="val",
+                input_size=self.input_size,
             )
 
     def train_dataloader(self):

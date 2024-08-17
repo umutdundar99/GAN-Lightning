@@ -3,7 +3,7 @@ import time
 import pytorch_lightning as pl
 from omegaconf import DictConfig
 from gan_lightning.utils import get_loss
-from gan_lightning.src.models.get_model import get_model
+from gan_lightning.src.models.functions import get_model
 from gan_lightning.input.utils.get_dataloader import get_dataloader
 from lightning.pytorch.loggers import MLFlowLogger
 from gan_lightning.input.utils.augmentations import GAN_Augmentation
@@ -38,12 +38,13 @@ def GAN_Lightning(config: DictConfig):
         os.makedirs(os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month))
 
     monitor = "train_loss" if config.training_params.monitor == "train" else "val_loss"
+    info_logger.info(f"Using monitor {monitor}")
 
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
-        monitor="train_loss",
+        monitor=monitor,
         dirpath=os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month),
         filename=f"{config.training_params.model.architecture}-{hour_day_month}-"
-        + "{epoch}-{train_loss:.2f}-best",
+        + "{epoch}-{val_loss:.2f}-best",
         save_top_k=1,
         mode="min",
     )

@@ -79,9 +79,16 @@ class SimpleGAN(LightningModule):
                 )
 
     def configure_optimizers(self):
-        G_optimizer = get_optimizer(self.G.parameters(), self.optimizer_dict)
-        D_Optimizer = get_optimizer(self.D.parameters(), self.optimizer_dict)
-        return [G_optimizer[0], D_Optimizer[0]], [G_optimizer[1], D_Optimizer[1]]
+        G_optimizer = get_optimizer(
+            self.G.parameters(), self.optimizer_dict, betas=(0.5, 0.999)
+        )
+        D_Optimizer = get_optimizer(
+            self.D.parameters(), self.optimizer_dict, betas=(0.5, 0.999)
+        )
+        if D_Optimizer[1] is None:
+            return G_optimizer[0], D_Optimizer[0]
+        else:
+            return [G_optimizer[0], D_Optimizer[0]], [G_optimizer[1], D_Optimizer[1]]
 
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():

@@ -9,9 +9,4 @@ Resize:
   always_apply: True
   height: 64
   width: 64
-  p:  1.0
-CenterCrop:
-  enabled: True
-  always_apply: True
-  height: 64
-  width: 64
+  p: 1.0

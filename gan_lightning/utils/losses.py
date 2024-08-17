@@ -6,6 +6,27 @@ from torch import nn
 from kornia.losses import FocalLoss as FL
 
 
+class FocalLoss(nn.Module):
+    def __init__(self, alpha=1, gamma=2, reduce=True):
+        super(FocalLoss, self).__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduce = reduce
+        self.criterion = BCEWithLogitsLoss()
+
+    def forward(self, inputs, targets):
+
+        BCE_loss = self.criterion(inputs, targets)
+        pt = torch.exp(-BCE_loss)
+        F_loss = self.alpha * (1 - pt) ** self.gamma * BCE_loss
+
+        if self.reduce:
+            return torch.mean(F_loss)
+
+    def __name__(self):
+        return "FocalLoss"
+
+
 class BasicGenLoss(torch.nn.Module):
     def __init__(
         self,
@@ -13,6 +34,7 @@ class BasicGenLoss(torch.nn.Module):
         discriminator: nn.Module,
         input_dim: int,
         device: str,
+        # loss: nn.Module = FocalLoss(alpha=1, gamma=2),
         loss: nn.Module = BCEWithLogitsLoss(),
     ):
         super().__init__()
@@ -43,6 +65,7 @@ class BasicDiscLoss(torch.nn.Module):
         discriminator: nn.Module,
         input_dim: int,
         device: str,
+        #loss: nn.Module = FocalLoss(alpha=1, gamma=2),
         loss: nn.Module = BCEWithLogitsLoss(),
     ):
         super().__init__()
@@ -56,6 +79,7 @@ class BasicDiscLoss(torch.nn.Module):
     def forward(self, x, batch_size):
         noise = self.create_noise(batch_size, self.input_dim, device=self.device[0])
         gen_out = self.generator(noise)
+        assert gen_out.shape == x.shape, "Generator output shape does not match input shape. Please check model input size in config."
         disc_fake_pred = self.discriminator(gen_out.detach())
         disc_fake_loss = self.loss(disc_fake_pred, torch.zeros_like(disc_fake_pred))
         disc_real_pred = self.discriminator(x)
@@ -97,27 +121,6 @@ class WDiscLoss(torch.nn.Module):
 
     def __name__(self):
         return "WDiscLoss"
-
-
-class FocalLoss(nn.Module):
-    def __init__(self, alpha=1, gamma=2, reduce=True):
-        super(FocalLoss, self).__init__()
-        self.alpha = alpha
-        self.gamma = gamma
-        self.reduce = reduce
-        self.criterion = BCEWithLogitsLoss()
-
-    def forward(self, inputs, targets):
-
-        BCE_loss = self.criterion(inputs, targets)
-        pt = torch.exp(-BCE_loss)
-        F_loss = self.alpha * (1 - pt) ** self.gamma * BCE_loss
-
-        if self.reduce:
-            return torch.mean(F_loss)
-
-    def __name__(self):
-        return "FocalLoss"
 
 
 class BCE(BCEWithLogitsLoss):

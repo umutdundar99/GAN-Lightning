@@ -4,12 +4,6 @@ Normalize:
   mean: [0.5, 0.5 , 0.5]
   std: [0.5, 0.5, 0.5]
   p: 1.0
-Resize:
-  enabled: True
-  always_apply: True
-  height: 64
-  width: 64
-  p:  1.0
 RandomBrightnessContrast:
   enabled: False
   always_apply : True

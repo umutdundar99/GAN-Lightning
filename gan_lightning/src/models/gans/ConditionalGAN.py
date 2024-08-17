@@ -110,7 +110,10 @@ class ConditionalGAN(LightningModule):
         D_Optimizer = get_optimizer(
             self.D.parameters(), self.optimizer_dict, betas=(0.5, 0.999)
         )
-        return [G_optimizer[0], D_Optimizer[0]], [G_optimizer[1], D_Optimizer[1]]
+        if D_Optimizer[1] is None:
+            return G_optimizer[0], D_Optimizer[0]
+        else:
+            return [G_optimizer[0], D_Optimizer[0]], [G_optimizer[1], D_Optimizer[1]]
 
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():

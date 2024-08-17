@@ -38,12 +38,12 @@ class deepconv_discriminator_block(nn.Module):
         else:
             self.block = nn.Sequential(
                 nn.Conv2d(
-                    input_channels, output_channels, kernel_size, stride, padding
+                    input_channels, output_channels, kernel_size, stride, padding, bias=False
                 ),
                 nn.BatchNorm2d(output_channels),
                 nn.LeakyReLU(0.2, inplace=True),
             )
 
-    def forward(self, x: torch.Tensor, is_final: bool = False):
+    def forward(self, x: torch.Tensor):
 
         return self.block(x)

@@ -137,13 +137,15 @@ class ClassificationHead(nn.Module):
         self.conv2 = _ConvBNReLU(in_channels // 2, in_channels // 4, 3, 1, 1)
         self.conv3 = _ConvBNReLU(in_channels // 4, in_channels // 8, 3, 1, 1)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(in_channels // 8, num_classes)
+        self.final_conv = nn.Conv2d(in_channels // 8,num_classes, 1)
+        self.fc = nn.Linear(num_classes, num_classes)
 
     def forward(self, x):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.avgpool(x)
+        x = self.final_conv(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
         return x

@@ -16,9 +16,7 @@ model.pth
 black.toml
 requirements.txt
 imgs
-models*
 .vscode
-
 ```
 
 #mlflow
@@ -28,7 +26,6 @@ mlruns/
 
 #data
 ```
-data/
 img_align_celeba/
 ```
 

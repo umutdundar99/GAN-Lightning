@@ -63,9 +63,9 @@ class DeepConvGAN(LightningModule):
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
 
-        if self.current_epoch % 2 == 0:
-
-            noise = create_noise(self.batch_size, self.input_dim)
+        if self.current_epoch % 5 == 0:
+            
+            noise = create_noise(50, self.input_dim)
             generated_images = self(noise)
             for enum, img in enumerate(generated_images):
                 image = img.cpu().detach().numpy()
@@ -87,7 +87,10 @@ class DeepConvGAN(LightningModule):
         D_Optimizer = get_optimizer(
             self.D.parameters(), self.optimizer_dict, betas=(0.5, 0.999)
         )
-        return [G_optimizer[0], D_Optimizer[0]], [G_optimizer[1], D_Optimizer[1]]
+        if D_Optimizer[1] is None:
+            return G_optimizer[0], D_Optimizer[0]
+        else:
+            return [G_optimizer[0], D_Optimizer[0]], [G_optimizer[1], D_Optimizer[1]]
 
     def set_attributes(self, config: Dict[str, Any]):
         for key, value in config.items():
@@ -103,9 +106,12 @@ class DeepConvGAN(LightningModule):
             input_dim=self.input_dim,
             img_channel=self.img_channel,
             input_size=self.input_size,
+            hidden_dim=64,
         )
         self.D = DeepConv_Discriminator(
-            img_channel=self.img_channel, input_size=self.input_size
+            img_channel=self.img_channel, 
+            input_size=self.input_size,
+            hidden_dim=128,
         )
         self.G.weight_init(config["weight_init_name"])
         self.D.weight_init(config["weight_init_name"])
@@ -124,7 +130,7 @@ class DeepConvGAN(LightningModule):
 
     def _init_eval(self, input_dim: int, img_channel: int, input_size: int):
         self.G = DeepConv_Generator(
-            input_dim=input_dim, img_channel=img_channel, input_size=input_size
+            input_dim=input_dim, img_channel=img_channel, hidden_dim=32, input_size=input_size,
         )
 
     def get_name(self):

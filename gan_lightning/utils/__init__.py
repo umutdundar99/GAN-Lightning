@@ -6,10 +6,11 @@ from torch.optim import (
     RMSprop,
     Rprop,
     SGD,
+    AdamW
 )
 from torch.optim.lr_scheduler import StepLR
 
-from gan_lightning.utils.losses.losses import (
+from gan_lightning.utils.losses import (
     BasicGenLoss,
     BasicDiscLoss,
     WDiscLoss,
@@ -27,6 +28,7 @@ __optimizers__ = [
     RMSprop,
     Rprop,
     SGD,
+    AdamW,
 ]
 
 
@@ -38,7 +40,7 @@ all_losses = [BCE, BasicGenLoss, BasicDiscLoss, WDiscLoss, WGenLoss, FocalLoss]
 
 def get_optimizer(model_params, optimizer_dict: str, **kwargs):
     scheduler_dict = optimizer_dict.get("scheduler", None)
-    if optimizer_dict["optimizer_name"] not in [
+    if optimizer_dict["optimizer_name"].lower() not in [
         optimizer.__name__.lower() for optimizer in __optimizers__
     ]:
         name = optimizer_dict["optimizer_name"]
@@ -56,12 +58,7 @@ def get_optimizer(model_params, optimizer_dict: str, **kwargs):
         logging.info("No scheduler found")
         return optimizer(lr=optimizer_dict["lr"], **kwargs)
     else:
-        if scheduler_dict["scheduler_name"] not in [
-            scheduler.__name__ for scheduler in __schedulers__
-        ]:
-            raise ValueError(
-                "Scheduler {} not found".format(scheduler_dict["scheduler_name"])
-            )
+        
         for scheduler in __schedulers__:
             if scheduler.__name__.lower() == scheduler_dict["scheduler_name"].lower():
                 scheduler = scheduler

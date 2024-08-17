@@ -26,6 +26,7 @@ class deepconv_generator_block(nn.Module):
         output_channels: int,
         stride: int = 2,
         kernel_size: int = 3,
+        padding: int = 0,
         final_block: bool = False,
     ):
         super(deepconv_generator_block, self).__init__()
@@ -33,7 +34,8 @@ class deepconv_generator_block(nn.Module):
         if final_block:
             self.block = nn.Sequential(
                 nn.ConvTranspose2d(
-                    input_channels, output_channels, kernel_size, stride
+                    input_channels, output_channels, kernel_size, stride,
+                    padding=padding,
                 ),
                 nn.Tanh(),
             )
@@ -45,6 +47,8 @@ class deepconv_generator_block(nn.Module):
                     output_channels,
                     kernel_size=kernel_size,
                     stride=stride,
+                    padding=padding,
+                    bias=False,
                 ),
                 nn.BatchNorm2d(output_channels),
                 nn.ReLU(inplace=True),
