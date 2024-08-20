@@ -9,9 +9,9 @@ dataset:
   pin_memory: true
   batch_size: 128
   num_classes: 40
-  
+
 training_params:
-  n_epochs: 201
+  n_epochs: 15
   display_step: 500
   device_num: [0]
   accelerator: gpu
@@ -19,7 +19,7 @@ training_params:
   checkpoint_dir: checkpoints/
   monitor: train
   model:
-    input_dim: 64
+    input_dim: 128
     architecture: DeepConvGAN
     input_size: 64
     pretrained: false
@@ -28,9 +28,9 @@ training_params:
     generator_loss: BasicGenLoss
   optimizer:
     optimizer_name: adam
-    lr: 0.0002
+    lr: 0.0005
     scheduler:
-      scheduler_name: StepLR
+      scheduler_name: None
       step_size: 100
       gamma: 0.5
 logger:

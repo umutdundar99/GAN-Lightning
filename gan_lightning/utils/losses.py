@@ -34,7 +34,7 @@ class BasicGenLoss(torch.nn.Module):
         discriminator: nn.Module,
         input_dim: int,
         device: str,
-        # loss: nn.Module = FocalLoss(alpha=1, gamma=2),
+        #loss: nn.Module = FocalLoss(alpha=0.5, gamma=2),
         loss: nn.Module = BCEWithLogitsLoss(),
     ):
         super().__init__()
@@ -65,7 +65,7 @@ class BasicDiscLoss(torch.nn.Module):
         discriminator: nn.Module,
         input_dim: int,
         device: str,
-        #loss: nn.Module = FocalLoss(alpha=1, gamma=2),
+        #loss: nn.Module = FocalLoss(alpha=0.5, gamma=2),
         loss: nn.Module = BCEWithLogitsLoss(),
     ):
         super().__init__()
@@ -79,7 +79,9 @@ class BasicDiscLoss(torch.nn.Module):
     def forward(self, x, batch_size):
         noise = self.create_noise(batch_size, self.input_dim, device=self.device[0])
         gen_out = self.generator(noise)
-        assert gen_out.shape == x.shape, "Generator output shape does not match input shape. Please check model input size in config."
+        assert (
+            gen_out.shape == x.shape
+        ), "Generator output shape does not match input shape. Please check model input size in config."
         disc_fake_pred = self.discriminator(gen_out.detach())
         disc_fake_loss = self.loss(disc_fake_pred, torch.zeros_like(disc_fake_pred))
         disc_real_pred = self.discriminator(x)

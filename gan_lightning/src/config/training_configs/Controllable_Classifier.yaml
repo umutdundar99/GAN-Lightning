@@ -28,7 +28,7 @@ training_params:
     classifier_loss: BCE
   optimizer:
     optimizer_name: adam
-    lr: 0.001
+    lr: 0.0001
     scheduler:
       scheduler_name: StepLR
       step_size: 25

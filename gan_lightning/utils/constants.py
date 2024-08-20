@@ -18,10 +18,12 @@ class num_classes:
     CELEBA: int = 2
     LSUN: int = 2
 
+
 @dataclass
 class input_size:
     MNIST: int = 28
     CELEBA: int = 128
+
 
 @dataclass
 class Constants:

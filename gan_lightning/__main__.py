@@ -23,6 +23,7 @@ if __name__ == "__main__":
             "DeepConvGAN",
             "SimpleGAN",
             "WGAN",
+            "Controllable_GAN",
         ],
         default="SimpleGAN",
     )
@@ -43,7 +44,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--input-dim",
         type=int,
-        default=128,
         help="Dimension of the noise vector for export and eval mode",
     )
 
@@ -64,22 +64,40 @@ if __name__ == "__main__":
         "--onnx-path",
         type=str,
         default=None,
+        nargs="+",
         help="Path to the onnx file for evaluation mode, if the model is Controllable_Classifier, firstly provide the path to the classifier onnx and then the generator onnx file path, provide only one path for the rest of the models",
+    )
+
+    parser.add_argument(
+        "--num-classes",
+        type=int,
+        help="Number of classes for the classifier model",
     )
 
     args = parser.parse_args()
 
+    eval_kwargs = {
+        "onnx_path": args.onnx_path,
+        "ckpt_path": args.ckpt_path,
+        "input_dim": args.input_dim,
+        "img_channel": args.img_channel,
+        "input_size": args.input_size,
+        "num_classes": args.num_classes,
+    }
+
     if args.mode == "eval":
-        if args.model == "Controllable_Classifier":
-            eval_controllable(args.onnx_path, args.input_dim)
+        if args.model == "Controllable_GAN":
+            eval_controllable(**eval_kwargs)
         elif args.model == "DeepConvGAN":
-            eval_deepconv(args.onnx_path, args.input_dim)
+            eval_deepconv(**eval_kwargs)
         elif args.model == "SimpleGAN":
-            eval_simple(args.onnx_path, args.input_dim)
+            eval_simple(**eval_kwargs)
         elif args.model == "WGAN":
-            eval_w(args.onnx_path, args.input_dim)
+            eval_w(**eval_kwargs)
         elif args.model == "ConditionalGAN":
-            eval_conditional(args.onnx_path, args.input_dim)
+            eval_conditional(**eval_kwargs)
+        else:
+            raise ValueError(f"Model {args.model} not supported for evaluation")
 
     elif args.mode == "train":
 
@@ -96,4 +114,5 @@ if __name__ == "__main__":
             input_dim=args.input_dim,
             img_channel=args.img_channel,
             input_size=args.input_size,
+            num_classes=args.num_classes,
         )

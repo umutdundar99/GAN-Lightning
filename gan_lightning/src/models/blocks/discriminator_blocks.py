@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from typing import Optional
-
+import torch.nn.utils as nn_utils
 
 class simple_1d_discriminator_block(nn.Module):
     def __init__(self, input_channels: int, output_channels: int):
@@ -30,20 +30,22 @@ class deepconv_discriminator_block(nn.Module):
 
         if final_block:
             self.block = nn.Sequential(
-                nn.AdaptiveAvgPool2d((4, 4)),
                 nn.Conv2d(
                     input_channels, output_channels, kernel_size, stride, padding
-                ),
+                )
             )
         else:
             self.block = nn.Sequential(
                 nn.Conv2d(
-                    input_channels, output_channels, kernel_size, stride, padding, bias=False
+                    input_channels,
+                    output_channels,
+                    kernel_size,
+                    stride,
+                    padding,
                 ),
                 nn.BatchNorm2d(output_channels),
                 nn.LeakyReLU(0.2, inplace=True),
             )
 
     def forward(self, x: torch.Tensor):
-
         return self.block(x)

@@ -86,10 +86,11 @@ class DeepConv_Discriminator(pl.LightningModule):
                 elif mode == "xavier":
                     nn.init.xavier_normal_(m.weight)
                 elif mode == "kaiming":
-                    nn.init.kaiming_normal_(m.weight)
+                    nn.init.kaiming_uniform_(m.weight)
                 else:
                     raise ValueError("Invalid weight initialization mode")
 
             elif isinstance(m, nn.BatchNorm2d):
-                m.weight.data.fill_(1)
-                m.bias.data.zero_()
+                if mode == "normal":
+                    nn.init.normal_(m.weight, 1.0, 0.02)
+                    nn.init.constant_(m.bias, 0)

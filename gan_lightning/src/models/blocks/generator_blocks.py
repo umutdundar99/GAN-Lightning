@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import torch.nn.utils as nn_utils
 
 
 class simple_1d_generator_block(nn.Module):
@@ -34,7 +35,10 @@ class deepconv_generator_block(nn.Module):
         if final_block:
             self.block = nn.Sequential(
                 nn.ConvTranspose2d(
-                    input_channels, output_channels, kernel_size, stride,
+                    input_channels,
+                    output_channels,
+                    kernel_size,
+                    stride,
                     padding=padding,
                 ),
                 nn.Tanh(),
@@ -43,12 +47,12 @@ class deepconv_generator_block(nn.Module):
         else:
             self.block = nn.Sequential(
                 nn.ConvTranspose2d(
-                    input_channels,
-                    output_channels,
-                    kernel_size=kernel_size,
-                    stride=stride,
-                    padding=padding,
-                    bias=False,
+                        input_channels,
+                        output_channels,
+                        kernel_size=kernel_size,
+                        stride=stride,
+                        padding=padding,
+                    
                 ),
                 nn.BatchNorm2d(output_channels),
                 nn.ReLU(inplace=True),

@@ -3,16 +3,23 @@ import torch
 import torch.onnx
 from onnxsim import simplify
 from gan_lightning.src.models import registered_models
+from typing import Optional
 
 
 def export_model(
-    model: str, ckpt_path: str, input_dim: int, img_channel: int, input_size: int
+    model: Optional[str],
+    ckpt_path: Optional[str],
+    input_dim: Optional[int],
+    img_channel: Optional[int],
+    input_size: Optional[int],
+    num_classes: Optional[int] = 40,
 ):
 
     export_kwargs = {
         "input_dim": input_dim,
         "img_channel": img_channel,
-        "input_size": input_size,
+        "input_size": input_size if len(input_size) > 1 else input_size[0],
+        "num_classes": num_classes,
     }
 
     model = registered_models[model]
@@ -20,13 +27,18 @@ def export_model(
     state_dict = torch.load(ckpt_path)["state_dict"]
     model.load_state_dict(state_dict, strict=False)
     model.eval()
-    dummy_input = torch.randn(1, input_dim)
+    if input_dim is not None:
+        dummy_input = torch.randn(1, input_dim)
+    else:
+        dummy_input = torch.randn(1, img_channel, *input_size)
+
     torch.onnx.export(
         model,
         dummy_input,
         f"{model.get_name()}.onnx",
         input_names=["input"],
         output_names=["output"],
+        verbose=False,
     )
 
     # simplify onnx model

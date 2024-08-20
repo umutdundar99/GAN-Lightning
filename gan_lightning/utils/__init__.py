@@ -1,13 +1,7 @@
 from gan_lightning.utils.config import *  # noqa F401
 import logging
 from omegaconf import OmegaConf
-from torch.optim import (
-    Adam,
-    RMSprop,
-    Rprop,
-    SGD,
-    AdamW
-)
+from torch.optim import Adam, RMSprop, Rprop, SGD, AdamW
 from torch.optim.lr_scheduler import StepLR
 
 from gan_lightning.utils.losses import (

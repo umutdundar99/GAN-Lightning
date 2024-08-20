@@ -83,6 +83,8 @@ class Controllable_Classifier(LightningModule):
         self.log(
             "val_multi_label_accuracy", self.val_multi_label_accuracy, prog_bar=True
         )
+        print(f"Validation Loss: {val_loss}", flush=True)
+        print(f"Validation Accuracy: {self.val_multi_label_accuracy}", flush=True)
         return val_loss
 
     def validation_epoch_end(self, outputs):
@@ -111,6 +113,7 @@ class Controllable_Classifier(LightningModule):
         for key, value in config.items():
             setattr(self, key, value)
 
+
     def weight_init(self, mode):
 
         if mode == "kaiming":
@@ -119,16 +122,11 @@ class Controllable_Classifier(LightningModule):
                     nn.init.kaiming_normal_(
                         m.weight, mode="fan_out", nonlinearity="relu"
                     )
-                elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
-                    nn.init.constant_(m.weight, 1)
-                    nn.init.constant_(m.bias, 0)
         elif mode == "xavier":
             for m in self.modules():
                 if isinstance(m, (nn.Conv2d, nn.Linear)):
                     nn.init.xavier_uniform_(m.weight)
-                elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
-                    nn.init.constant_(m.weight, 1)
-                    nn.init.constant_(m.bias, 0)
+
         elif mode == "orthogonal":
             for m in self.modules():
                 if isinstance(m, (nn.Conv2d, nn.Linear)):
@@ -154,6 +152,9 @@ class Controllable_Classifier(LightningModule):
         correct = (y_pred == y_true.int()).all(dim=1).float()
         accuracy = correct.sum() / len(correct)
         return accuracy
+
+    def get_name(self):
+        return "Controllable_Classifier"
 
 
 if __name__ == "__main__":

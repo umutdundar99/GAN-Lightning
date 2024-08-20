@@ -45,7 +45,7 @@ def GAN_Lightning(config: DictConfig):
         dirpath=os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month),
         filename=f"{config.training_params.model.architecture}-{hour_day_month}-"
         + "{epoch}-{val_loss:.2f}-best",
-        save_top_k=1,
+        save_top_k=5,
         mode="min",
     )
 

@@ -10,7 +10,6 @@ from typing import Optional
 from gan_lightning.input.utils.augmentations import GAN_Augmentation
 
 
-
 @register_dataset("mnist")
 class MNISTDataModule(LightningDataModule):
     def __init__(

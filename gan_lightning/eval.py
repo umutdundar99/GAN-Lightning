@@ -1,34 +1,89 @@
-from gan_lightning.utils.noise import create_noise
-import onnx
-import onnxruntime
-import torch.onnx
-import numpy as np
 import cv2
+import os
+import onnxruntime
+import torch
+import numpy as np
 
 
-def eval_controllable(ckpt_path: str, num_samples: int = 25):
+def create_noise(num_samples: int, input_dim: int, device: str = "cuda"):
+    noise = torch.randn(num_samples, input_dim).to(device)
+    return noise
+
+
+def updated_noise(noise, weight):
+    new_noise = noise + (noise.grad * weight)
+    return new_noise
+
+
+def save_images(image: np.ndarray, path: str, step: int):
+    """
+    Function for visualizing images: Given a tensor of images, number of images, and
+    size per image, plots and prints the images in an uniform grid.
+    """
+    image = (image + 1) / 2
+    image = image.detach().cpu().numpy()
+    images = [image[i].transpose(1, 2, 0) * 255 for i in range(3)]
+
+    for i in range(3):
+        os.makedirs(os.path.join(path, str(i)), exist_ok=True)
+        cv2.imwrite(os.path.join(path, str(i), f"{step}.png"), images[i])
+
+
+def eval_controllable(**kwargs: dict):
+
+    ckpt_paths = kwargs["ckpt_path"]
+    num_classes = kwargs["num_classes"]
+    input_dim = kwargs["input_dim"]
+    classifier_ckpt_path, generator_ckpt_path = ckpt_paths[0], ckpt_paths[1]
+    input_size = kwargs["input_size"]
+    img_channel = kwargs["img_channel"]
+    steps = 20
 
     from gan_lightning.src.models.classifiers.controllable_classifier import (
-        Controllable_Classifier,
+        Controllable_Classifier as Classifier,
     )
-    from gan_lightning.src.models.generators.deepconv_generator import (
-        DeepConv_Generator,
-    )
+    from gan_lightning.src.models.gans.DeepConvGAN import DeepConvGAN as Generator
 
-    classifier_ckpt_path, generator_ckpt_path = ckpt_path[0], ckpt_path[1]
-    input_dim = 64
+    save_path = "eval_results"
+
+    os.makedirs(save_path, exist_ok=True)
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    classifier = Controllable_Classifier(mode="eval")
+    classifier = Classifier(mode="eval", num_classes=num_classes).to(device)
     classifier_state_dict = torch.load(classifier_ckpt_path)["state_dict"]
-    classifier.load_state_dict(classifier_state_dict)
+    classifier.load_state_dict(classifier_state_dict, strict=False)
+    classifier.eval()
 
-    generator = DeepConv_Generator(input_dim=input_dim).to(device)
-    print(generator_ckpt_path)
-    generator_state_dict = torch.load(generator_ckpt_path)["gen"]
-    generator.load_state_dict(generator_state_dict)
+    generator = Generator(
+        input_dim=input_dim, img_channel=img_channel, input_size=input_size, mode="eval"
+    ).to(device)
+    generator_state_dict = torch.load(generator_ckpt_path)["state_dict"]
+    generator.load_state_dict(generator_state_dict, strict=False)
+    generator.eval()
 
     print("Models loaded successfully")
+
+    #     feature_names = ["5oClockShadow", "ArchedEyebrows", "Attractive", "BagsUnderEyes", "Bald", "Bangs",
+    # "BigLips", "BigNose", "BlackHair", "BlondHair", "Blurry", "BrownHair", "BushyEyebrows", "Chubby",
+    # "DoubleChin", "Eyeglasses", "Goatee", "GrayHair", "HeavyMakeup", "HighCheekbones", "Male",
+    # "MouthSlightlyOpen", "Mustache", "NarrowEyes", "NoBeard", "OvalFace", "PaleSkin", "PointyNose",
+    # "RecedingHairline", "RosyCheeks", "Sideburn", "Smiling", "StraightHair", "WavyHair", "WearingEarrings",
+    # "WearingHat", "WearingLipstick", "WearingNecklace", "WearingNecktie", "Young"]
+    feature_names = ["Smiling"]
+
+    for feature in feature_names:
+        optimizer = torch.optim.Adam(classifier.parameters(), lr=0.01)
+        noise = create_noise(5, input_dim, device).requires_grad_()
+        indice = feature_names.index(feature)
+        os.makedirs(os.path.join(save_path, feature), exist_ok=True)
+        for i in range(steps):
+            optimizer.zero_grad()
+            generated_image = generator(noise)
+            fake_score = classifier(generated_image)[:, indice].mean()
+            print(f"Step: {i}, Score: {fake_score.item()}")
+            fake_score.backward()
+            noise.data = updated_noise(noise, 1 / steps)
+            save_images(generated_image, os.path.join(save_path, feature), i)
 
 
 def eval_deepconv(onnx_path: str, input_dim: int = 128):

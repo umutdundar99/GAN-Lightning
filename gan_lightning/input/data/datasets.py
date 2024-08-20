@@ -8,7 +8,9 @@ from torch.utils.data import Dataset
 
 
 class CelebaDataset(Dataset):
-    def __init__(self, annotations_file, img_dir, transform=None, subset=None, input_size=128):
+    def __init__(
+        self, annotations_file, img_dir, transform=None, subset=None, input_size=128
+    ):
 
         self.img_dir = img_dir
         self.transform = transform
@@ -26,8 +28,8 @@ class CelebaDataset(Dataset):
         if subset == "val":
             self.image_files = self.image_files[:2000]
             self.attributes = self.attributes.iloc[:2000]
+        print(f"Lenght of {subset} dataset: {len(self.image_files)}")
         
-        print(f"Number of images: {len(self.image_files)}")
 
     def __len__(self):
         return len(self.image_files)

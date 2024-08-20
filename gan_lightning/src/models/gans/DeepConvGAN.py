@@ -32,7 +32,7 @@ class DeepConvGAN(LightningModule):
             self._init_training(training_config, optimizer_dict, dataset_config, losses)
         elif mode == "eval":
             self._init_eval(
-                kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"]
+                kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"], kwargs.get("hidden_dim", 64)
             )
 
     def forward(self, x: torch.Tensor):
@@ -63,8 +63,8 @@ class DeepConvGAN(LightningModule):
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
 
-        if self.current_epoch % 5 == 0:
-            
+        if self.current_epoch % 1 == 0:
+
             noise = create_noise(50, self.input_dim)
             generated_images = self(noise)
             for enum, img in enumerate(generated_images):
@@ -82,10 +82,10 @@ class DeepConvGAN(LightningModule):
 
     def configure_optimizers(self):
         G_optimizer = get_optimizer(
-            self.G.parameters(), self.optimizer_dict, betas=(0.5, 0.999)
+            self.G.parameters(), self.optimizer_dict, betas=(0.5, 0.9)
         )
         D_Optimizer = get_optimizer(
-            self.D.parameters(), self.optimizer_dict, betas=(0.5, 0.999)
+            self.D.parameters(), self.optimizer_dict, betas=(0.5, 0.9)
         )
         if D_Optimizer[1] is None:
             return G_optimizer[0], D_Optimizer[0]
@@ -106,12 +106,12 @@ class DeepConvGAN(LightningModule):
             input_dim=self.input_dim,
             img_channel=self.img_channel,
             input_size=self.input_size,
-            hidden_dim=64,
+            hidden_dim=32,
         )
         self.D = DeepConv_Discriminator(
-            img_channel=self.img_channel, 
+            img_channel=self.img_channel,
             input_size=self.input_size,
-            hidden_dim=128,
+            hidden_dim=64,
         )
         self.G.weight_init(config["weight_init_name"])
         self.D.weight_init(config["weight_init_name"])
@@ -128,9 +128,12 @@ class DeepConvGAN(LightningModule):
 
         self.automatic_optimization = False
 
-    def _init_eval(self, input_dim: int, img_channel: int, input_size: int):
+    def _init_eval(self, input_dim: int, img_channel: int, input_size: int, hidden_dim: int):
         self.G = DeepConv_Generator(
-            input_dim=input_dim, img_channel=img_channel, hidden_dim=32, input_size=input_size,
+            input_dim=input_dim,
+            img_channel=img_channel,
+            hidden_dim=hidden_dim,
+            input_size=input_size,
         )
 
     def get_name(self):
