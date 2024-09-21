@@ -1,0 +1,161 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Train",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "ConditionalGAN"],
+        },
+        
+
+        {
+            "name": "Export CelebA DeepConvGAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "DeepConvGAN",
+                    "--ckpt-path", "gan_lightning/checkpoints/Celeba-DeepConvGAN.ckpt",
+                    "--mode","export",
+                    "--img-channel", "3",
+                    "--input-dim", "128",
+                    "--input-size", "64", "64"
+                    "--dataset-name", "CelebA"
+            ]
+        },
+
+        {
+            "name": "Export CelebA Controllable Classifier",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "Controllable_Classifier",
+                    "--ckpt-path", "gan_lightning/checkpoints/Celeba-Controllable_Classifier.ckpt",
+                    "--mode", "export",
+                    "--img-channel", "3",
+                    "--input-size", "64", "64"
+            ]
+        },
+        
+        {
+            "name": "Export MNIST WGAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "WGAN",
+                    "--ckpt-path", "gan_lightning/checkpoints/MNIST-WGAN.ckpt",
+                    "--mode", "export",
+                    "--img-channel", "3",
+                    "--input-dim", "64",
+                    "--input-size", "64", "64"
+                    "--dataset-name", "MNIST"
+            ]
+        },
+        {
+            "name": "Export MNIST SimpleGAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "SimpleGAN",
+                    "--ckpt-path", "gan_lightning/checkpoints/MNIST-SimpleGAN.ckpt",
+                    "--mode", "export",
+                    "--img-channel", "3",
+                    "--input-dim", "64",
+                    "--input-size", "64" , "64"
+                    "--dataset-name", "MNIST"
+            ]
+        },
+        {
+            "name": "Export MNIST ConditionalGAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "ConditionalGAN",
+                    "--ckpt-path", "gan_lightning/checkpoints/MNIST-ConditionalGAN.ckpt",
+                    "--mode", "export",
+                    "--img-channel", "1",
+                    "--input-dim", "64",
+                    "--num-class", "10",
+                    "--input-size", "28", "28"
+                    "--dataset-name", "MNIST"
+            ]
+        },
+        {
+            "name": "Export MNIST DeepConvGAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "DeepConvGAN",
+                    "--ckpt-path", "gan_lightning/checkpoints/MNIST-DeepConvGAN.ckpt",
+                    "--mode","export",
+                    "--img-channel", "1",
+                    "--input-dim", "128",
+                    "--input-size", "28", "28"
+                    "--dataset-name", "MNIST"
+            ]
+        },
+
+        {
+            "name": "Eval Controllable GAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "Controllable_GAN",
+                    "--ckpt-path", "gan_lightning/checkpoints/Celeba-Controllable_Classifier.ckpt", "gan_lightning/checkpoints/Celeba-DeepConvGenerator2.ckpt",
+                    "--mode", "eval",
+                    "--input-dim", "64",
+                    "--num-classes", "40",
+                    "--input-size", "64", 
+                    "--img-channel", "3"
+            ]
+        },
+
+        {
+            "name": "Eval CelebA DeepConvGAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "DeepConvGAN", 
+                    "--onnx-path", "gan_lightning/onnxes/CelebA-DeepConvGAN.onnx",
+                    "--mode","eval",
+                    "--input-dim", "128",
+                    "--img-channel", "3",
+                    "--input-size", "64"]
+        },
+
+        {
+            "name": "Eval MNIST DeepConvGAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "DeepConvGAN", 
+                    "--onnx-path", "gan_lightning/onnxes/MNIST-DeepConvGAN.onnx",
+                    "--mode","eval",
+                    "--input-dim", "128",
+                    "--img-channel", "1",
+                    "--input-size", "28"]
+        },
+        
+        {
+            "name": "Eval MNIST ConditionalGAN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gan_lightning",
+            "args": ["--model", "ConditionalGAN", 
+                    "--onnx-path", "gan_lightning/onnxes/MNIST-ConditionalGAN.onnx",
+                    "--mode","eval",
+                    "--input-dim", "64",
+                    "--img-channel", "1",
+                    "--input-size", "28",
+                    "--num-class", "10",
+                    "--number-to-generate", "3",
+        ]
+        },
+
+
+    ]
+}

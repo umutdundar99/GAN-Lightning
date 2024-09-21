@@ -16,7 +16,6 @@ model.pth
 black.toml
 requirements.txt
 imgs
-.vscode
 ```
 
 #mlflow
