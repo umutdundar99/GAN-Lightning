@@ -106,12 +106,12 @@ class DeepConvGAN(LightningModule):
             input_dim=self.input_dim,
             img_channel=self.img_channel,
             input_size=self.input_size,
-            hidden_dim=32,
+            hidden_dim=64,
         )
         self.D = DeepConv_Discriminator(
             img_channel=self.img_channel,
             input_size=self.input_size,
-            hidden_dim=64,
+            hidden_dim=96,
         )
         self.G.weight_init(config["weight_init_name"])
         self.D.weight_init(config["weight_init_name"])
@@ -136,5 +136,6 @@ class DeepConvGAN(LightningModule):
             input_size=input_size,
         )
 
-    def get_name(self):
+
+    def name(self):
         return "DeepConvGAN"

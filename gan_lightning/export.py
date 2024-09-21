@@ -13,17 +13,21 @@ def export_model(
     img_channel: Optional[int],
     input_size: Optional[int],
     num_classes: Optional[int] = 40,
+    dataset_name: str = "mnist",
+    save_dir: str = "gan_lightning/onnxes",
+    
 ):
-
+    
     export_kwargs = {
         "input_dim": input_dim,
         "img_channel": img_channel,
-        "input_size": input_size if len(input_size) > 1 else input_size[0],
+        "input_size": input_size[0] if len(input_size) > 1 else input_size,
         "num_classes": num_classes,
     }
 
     model = registered_models[model]
     model = model(mode="eval", **export_kwargs)
+    model_name = model.name()
     state_dict = torch.load(ckpt_path)["state_dict"]
     model.load_state_dict(state_dict, strict=False)
     model.eval()
@@ -35,14 +39,14 @@ def export_model(
     torch.onnx.export(
         model,
         dummy_input,
-        f"{model.get_name()}.onnx",
+        f"{save_dir}/{dataset_name}-{model_name}.onnx",
         input_names=["input"],
         output_names=["output"],
         verbose=False,
     )
 
     # simplify onnx model
-    onnx_model = onnx.load(f"{model.get_name()}.onnx")
+    onnx_model = onnx.load(f"{model_name}.onnx")
     simplified_model, check = simplify(onnx_model)
     assert check, "Simplified ONNX model could not be validated"
-    onnx.save(simplified_model, f"{model.get_name()}_simplified.onnx")
+    onnx.save(simplified_model, f"{save_dir}/{dataset_name}-{model_name}.onnx")

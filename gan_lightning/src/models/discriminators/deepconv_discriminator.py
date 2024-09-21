@@ -14,8 +14,7 @@ class DeepConv_Discriminator(pl.LightningModule):
         self, img_channel: int = 1, hidden_dim: int = 32, input_size: int = 28, **kwargs
     ):
         super().__init__()
-
-        input_size = 64
+        
         if input_size == 28:
             kernel = [3, 4, 4, 4, 4]
             stride = [2, 2, 2, 2, 2]

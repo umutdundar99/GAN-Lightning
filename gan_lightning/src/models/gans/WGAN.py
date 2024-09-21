@@ -38,6 +38,7 @@ class WGAN(LightningModule):
     def training_step(self, batch: List[torch.Tensor]):
         gen_opt, disc_opt = self.optimizers()
         X, _ = batch
+        X = X.unsqueeze(1)
         batch_size = X.shape[0]
         for _ in range(self.D_train_freq):
             disc_opt.zero_grad()
@@ -71,7 +72,7 @@ class WGAN(LightningModule):
         noise = create_noise(40, self.input_dim)
         generated_images = self(noise)
 
-        if self.current_epoch % 6 == 0:
+        if self.current_epoch % 25 == 0:
             for enum, img in enumerate(generated_images):
                 image = img.cpu().detach().numpy()
                 image = image.transpose(1, 2, 0)
@@ -109,9 +110,9 @@ class WGAN(LightningModule):
         losses: Dict[str, Any],
     ):
         self.set_attributes(training_config)
-        self.G = DeepConv_Generator(input_dim=self.input_dim, hidden_dim=64)
+        self.G = DeepConv_Generator(input_dim=self.input_dim, hidden_dim=64, **{"input_size": self.input_size})
         self.G.weight_init(training_config["weight_init_name"])
-        self.D = DeepConv_Discriminator(hidden_dim=64)
+        self.D = DeepConv_Discriminator(hidden_dim=128, **{"input_size": self.input_size})
         self.D.weight_init(training_config["weight_init_name"])
         self.D_train_freq = 5
         self.optimizer_dict = optimizer_dict
@@ -129,4 +130,4 @@ class WGAN(LightningModule):
         self.automatic_optimization = False
 
     def _init_eval(self, input_dim: int):
-        self.G = DeepConv_Generator(input_dim=self.input_dim, hidden_dim=64)
+        self.G = DeepConv_Generator(input_dim=input_dim, hidden_dim=64)

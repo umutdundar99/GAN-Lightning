@@ -9,13 +9,13 @@ dataset:
   pin_memory: true
   batch_size: 128
 training_params:
-  n_epochs: 41
+  n_epochs: 51
   display_step: 500
   device_num: [0]
   accelerator: gpu
   weight_init_name: normal
   checkpoint_dir: checkpoints/
-  monitor: train
+  monitor: None
   model:
     input_dim: 64
     architecture: SimpleGAN

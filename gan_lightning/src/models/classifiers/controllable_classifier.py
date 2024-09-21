@@ -17,7 +17,7 @@ class Controllable_Classifier(LightningModule):
         training_config: Optional[Dict[str, Any]] = None,
         img_channel: int = 3,
         num_classes: int = 40,
-        hidden_dim: int = 32,
+        hidden_dim: int = 128,
         mode: str = "train",
         **kwargs,
     ):
@@ -31,7 +31,7 @@ class Controllable_Classifier(LightningModule):
         )
 
         self.num_classes = num_classes
-        self.classifier_head = ClassificationHead(hidden_dim * 6, num_classes)
+        self.classifier_head = ClassificationHead(hidden_dim *3, num_classes)
 
         if mode == "train":
             self.set_attributes(training_config)
@@ -83,8 +83,6 @@ class Controllable_Classifier(LightningModule):
         self.log(
             "val_multi_label_accuracy", self.val_multi_label_accuracy, prog_bar=True
         )
-        print(f"Validation Loss: {val_loss}", flush=True)
-        print(f"Validation Accuracy: {self.val_multi_label_accuracy}", flush=True)
         return val_loss
 
     def validation_epoch_end(self, outputs):

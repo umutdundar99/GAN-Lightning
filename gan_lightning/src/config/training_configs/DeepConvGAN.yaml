@@ -11,13 +11,13 @@ dataset:
   num_classes: 40
 
 training_params:
-  n_epochs: 15
+  n_epochs: 7
   display_step: 500
   device_num: [0]
   accelerator: gpu
   weight_init_name: normal
   checkpoint_dir: checkpoints/
-  monitor: train
+  monitor: None
   model:
     input_dim: 128
     architecture: DeepConvGAN

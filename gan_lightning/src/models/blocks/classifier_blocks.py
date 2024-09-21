@@ -66,7 +66,7 @@ class Mobilenetv2_Feature_Extractor(nn.Module):
         in_channels=64,
         block_channels=(64, 96, 128),
         out_channels=128,
-        t=3,
+        t=6,
         num_blocks=3,
         **kwargs,
     ):

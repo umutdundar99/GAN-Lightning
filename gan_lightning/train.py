@@ -37,17 +37,20 @@ def GAN_Lightning(config: DictConfig):
     ):
         os.makedirs(os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month))
 
-    monitor = "train_loss" if config.training_params.monitor == "train" else "val_loss"
+    monitor = f"{config.training_params.monitor}_loss" if config.training_params.monitor != "None" else None
     info_logger.info(f"Using monitor {monitor}")
 
+    # ModelCheckpoint parametrelerini ayarlarken
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
-        monitor=monitor,
         dirpath=os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month),
         filename=f"{config.training_params.model.architecture}-{hour_day_month}-"
         + "{epoch}-{val_loss:.2f}-best",
-        save_top_k=5,
         mode="min",
     )
+    
+    if monitor is not None:
+        checkpoint_callback.monitor = monitor
+        checkpoint_callback.save_top_k = 2
 
     RichProgressBar = pl.callbacks.RichProgressBar()
     callbacks.append(RichProgressBar)

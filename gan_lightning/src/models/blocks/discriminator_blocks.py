@@ -30,6 +30,7 @@ class deepconv_discriminator_block(nn.Module):
 
         if final_block:
             self.block = nn.Sequential(
+                nn.AdaptiveAvgPool2d((4, 4)),
                 nn.Conv2d(
                     input_channels, output_channels, kernel_size, stride, padding
                 )

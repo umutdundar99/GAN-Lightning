@@ -10,13 +10,13 @@ dataset:
   batch_size: 128
   num_classes: 40
 training_params:
-  n_epochs: 200
+  n_epochs: 101
   display_step: 500
   device_num: [0]
   accelerator: gpu
   weight_init_name: normal
   checkpoint_dir: checkpoints/
-  monitor: train
+  monitor: None
   model:
     input_dim: 64
     architecture: WGAN
@@ -27,9 +27,9 @@ training_params:
     generator_loss:  WGenLoss
   optimizer:
     optimizer_name: adam
-    lr: 0.001
+    lr: 0.0002
     scheduler:
-      scheduler_name: StepLR
+      scheduler_name: None
       step_size: 25
       gamma: 0.5
 logger:

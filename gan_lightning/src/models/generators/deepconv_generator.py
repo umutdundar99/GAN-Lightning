@@ -15,12 +15,21 @@ class DeepConv_Generator(pl.LightningModule):
         self, input_dim: int = 10, img_channel: int = 1, hidden_dim: int = 32, **kwargs
     ):
         super().__init__(),
-        self.input_size = kwargs.get("input_size", 64)
+        input_size = kwargs.get("input_size", 64)
 
-        kernel = [4, 4, 4, 4, 4]
-        stride = [1, 2, 2, 2, 2]
-        padding = [0, 1, 1, 1, 1]
-
+        if input_size == 64:
+            kernel = [3, 3, 3, 3, 4]
+            stride = [2, 2, 2, 2, 2]
+            padding = [0, 0, 0, 0, 0]
+        
+        elif input_size == 28:
+            kernel = [4, 4, 3, 2, 1]
+            stride = [1, 2, 2, 2, 1]
+            padding = [0, 1, 1, 1, 0]
+        else:
+            raise ValueError("Invalid input size")
+        print(f"Input size: {input_size}")
+            
         self.input_dim = input_dim
         self.generator = nn.Sequential(
             deepconv_generator_block(input_dim, hidden_dim*8, kernel_size=kernel[0], stride=stride[0], padding=padding[0]),

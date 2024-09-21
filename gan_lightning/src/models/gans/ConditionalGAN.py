@@ -42,6 +42,7 @@ class ConditionalGAN(LightningModule):
     def training_step(self, batch: List[torch.Tensor]):
         gen_opt, disc_opt = self.optimizers()
         X, y = batch
+        X = X.unsqueeze(1)
         batch_size = X.shape[0]
         one_hot_labels = F.one_hot(y, num_classes=self.num_classes)
         y = one_hot_labels[:, :, None, None]
@@ -89,7 +90,7 @@ class ConditionalGAN(LightningModule):
         )
         noise = torch.cat((noise, one_hot_labels), dim=1)
         generated_images = self(noise)
-        if self.current_epoch % 6 == 0:
+        if self.current_epoch % 50 == 0:
             for enum, img in enumerate(generated_images):
                 image = img.cpu().detach().numpy()
                 image = image.transpose(1, 2, 0)
@@ -132,23 +133,22 @@ class ConditionalGAN(LightningModule):
         dataset_config: Dict[str, Any],
         losses: Dict[str, Any],
     ):
+        self.set_attributes(training_config)
         constants = Constants()
         img_channel = getattr(constants.IMG_CHANNEL, dataset_config["name"].upper())
         self.num_classes = getattr(
             constants.NUM_CLASSES, dataset_config["name"].upper()
         )
-        self.input_dim = training_config["input_dim"]
-        self.input_dim, self.img_channel = self.set_input_dim(
+        _input_dim, self.img_channel = self.set_input_dim(
             self.input_dim, img_channel, self.num_classes
         )
-        self.G = DeepConv_Generator(input_dim=self.input_dim)
+        self.G = DeepConv_Generator(input_dim=_input_dim, **{"input_size": self.input_size})
         self.G.weight_init(training_config["weight_init_name"])
         self.D = DeepConv_Discriminator(
-            img_channel=self.img_channel, hidden_dim=training_config["input_dim"]
+            img_channel=self.img_channel,**{"input_size": self.input_size}
         )
         self.D.weight_init(training_config["weight_init_name"])
         self.optimizer_dict = optimizer_dict
-        self.set_attributes(training_config)
         self.discriminator_loss = losses.get("discriminator_loss", None)
         self.d_loss = self.discriminator_loss()
         self.generator_loss = losses.get("generator_loss", None)
@@ -160,3 +160,6 @@ class ConditionalGAN(LightningModule):
         self.G = DeepConv_Generator(
             input_dim=input_dim, img_channel=img_channel, input_size=input_size
         )
+
+    def name(self):
+        return "ConditionalGAN"
