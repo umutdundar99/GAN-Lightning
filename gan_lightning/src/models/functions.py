@@ -18,7 +18,7 @@ def get_model(training_config, dataset_config, loss, **kwargs):
         dataset_config=dataset_config,
         losses=loss,
         optimizer_dict=training_config["optimizer"],
-        **kwargs
+        **kwargs,
     )
 
 

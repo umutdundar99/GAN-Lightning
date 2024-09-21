@@ -9,19 +9,20 @@ from gan_lightning.src.models.blocks.generator_blocks import (
 from gan_lightning.src.models import model_registration
 from typing import Optional
 
+
 @model_registration("Deep_Convolutional_Generator")
 class DeepConv_Generator(pl.LightningModule):
     def __init__(
         self, input_dim: int = 10, img_channel: int = 1, hidden_dim: int = 32, **kwargs
     ):
-        super().__init__(),
+        (super().__init__(),)
         input_size = kwargs.get("input_size", 64)
 
         if input_size == 64:
             kernel = [3, 3, 3, 3, 4]
             stride = [2, 2, 2, 2, 2]
             padding = [0, 0, 0, 0, 0]
-        
+
         elif input_size == 28:
             kernel = [4, 4, 3, 2, 1]
             stride = [1, 2, 2, 2, 1]
@@ -29,15 +30,39 @@ class DeepConv_Generator(pl.LightningModule):
         else:
             raise ValueError("Invalid input size")
         print(f"Input size: {input_size}")
-            
+
         self.input_dim = input_dim
         self.generator = nn.Sequential(
-            deepconv_generator_block(input_dim, hidden_dim*8, kernel_size=kernel[0], stride=stride[0], padding=padding[0]),
-            deepconv_generator_block(hidden_dim*8, hidden_dim*4, kernel_size=kernel[1], stride=stride[1], padding=padding[1]),
-            deepconv_generator_block(hidden_dim*4, hidden_dim*2, kernel_size=kernel[2], stride=stride[2], padding=padding[2]),
-            deepconv_generator_block(hidden_dim*2, hidden_dim, kernel_size=kernel[3], stride=stride[3], padding=padding[3]),
+            deepconv_generator_block(
+                input_dim,
+                hidden_dim * 8,
+                kernel_size=kernel[0],
+                stride=stride[0],
+                padding=padding[0],
+            ),
+            deepconv_generator_block(
+                hidden_dim * 8,
+                hidden_dim * 4,
+                kernel_size=kernel[1],
+                stride=stride[1],
+                padding=padding[1],
+            ),
+            deepconv_generator_block(
+                hidden_dim * 4,
+                hidden_dim * 2,
+                kernel_size=kernel[2],
+                stride=stride[2],
+                padding=padding[2],
+            ),
+            deepconv_generator_block(
+                hidden_dim * 2,
+                hidden_dim,
+                kernel_size=kernel[3],
+                stride=stride[3],
+                padding=padding[3],
+            ),
         )
-            
+
         self.final_block = deepconv_generator_block(
             hidden_dim,
             img_channel,

@@ -70,7 +70,6 @@ class Mobilenetv2_Feature_Extractor(nn.Module):
         num_blocks=3,
         **kwargs,
     ):
-
         super(Mobilenetv2_Feature_Extractor, self).__init__()
         self.bottleneck1 = self._make_layer(
             MobileNetV2Bottleneck, in_channels, block_channels[0], 3, t, 2

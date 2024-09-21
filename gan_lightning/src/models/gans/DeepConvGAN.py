@@ -32,7 +32,10 @@ class DeepConvGAN(LightningModule):
             self._init_training(training_config, optimizer_dict, dataset_config, losses)
         elif mode == "eval":
             self._init_eval(
-                kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"], kwargs.get("hidden_dim", 64)
+                kwargs["input_dim"],
+                kwargs["img_channel"],
+                kwargs["input_size"],
+                kwargs.get("hidden_dim", 64),
             )
 
     def forward(self, x: torch.Tensor):
@@ -62,9 +65,7 @@ class DeepConvGAN(LightningModule):
         return train_loss
 
     def training_epoch_end(self, outputs: EPOCH_OUTPUT) -> None:
-
         if self.current_epoch % 1 == 0:
-
             noise = create_noise(50, self.input_dim)
             generated_images = self(noise)
             for enum, img in enumerate(generated_images):
@@ -128,14 +129,15 @@ class DeepConvGAN(LightningModule):
 
         self.automatic_optimization = False
 
-    def _init_eval(self, input_dim: int, img_channel: int, input_size: int, hidden_dim: int):
+    def _init_eval(
+        self, input_dim: int, img_channel: int, input_size: int, hidden_dim: int
+    ):
         self.G = DeepConv_Generator(
             input_dim=input_dim,
             img_channel=img_channel,
             hidden_dim=hidden_dim,
             input_size=input_size,
         )
-
 
     def name(self):
         return "DeepConvGAN"

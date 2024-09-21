@@ -37,7 +37,11 @@ def GAN_Lightning(config: DictConfig):
     ):
         os.makedirs(os.path.join(os.getcwd(), "models", "checkpoints", hour_day_month))
 
-    monitor = f"{config.training_params.monitor}_loss" if config.training_params.monitor != "None" else None
+    monitor = (
+        f"{config.training_params.monitor}_loss"
+        if config.training_params.monitor != "None"
+        else None
+    )
     info_logger.info(f"Using monitor {monitor}")
 
     # ModelCheckpoint parametrelerini ayarlarken
@@ -47,7 +51,7 @@ def GAN_Lightning(config: DictConfig):
         + "{epoch}-{val_loss:.2f}-best",
         mode="min",
     )
-    
+
     if monitor is not None:
         checkpoint_callback.monitor = monitor
         checkpoint_callback.save_top_k = 2

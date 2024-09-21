@@ -52,7 +52,6 @@ def get_optimizer(model_params, optimizer_dict: str, **kwargs):
         logging.info("No scheduler found")
         return optimizer(lr=optimizer_dict["lr"], **kwargs)
     else:
-        
         for scheduler in __schedulers__:
             if scheduler.__name__.lower() == scheduler_dict["scheduler_name"].lower():
                 scheduler = scheduler

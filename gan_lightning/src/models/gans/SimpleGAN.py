@@ -66,7 +66,6 @@ class SimpleGAN(LightningModule):
 
         # if epoch % 10 == 0:
         if self.current_epoch % 50 == 0:
-
             for enum, img in enumerate(generated_images):
                 image = img.cpu().detach().numpy()
                 epoch = str(self.current_epoch)
@@ -121,7 +120,6 @@ class SimpleGAN(LightningModule):
         self.automatic_optimization = False
 
     def _init_eval(self, input_dim: int, img_channel: int, input_size: int):
-
         self.G = Simple_Generator(input_dim=self.input_dim)
 
     def name(self):

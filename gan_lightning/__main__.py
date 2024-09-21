@@ -9,7 +9,6 @@ from gan_lightning.eval import (
 from gan_lightning.export import export_model
 
 if __name__ == "__main__":
-
     import argparse
     from hydra import compose, initialize
 
@@ -57,6 +56,7 @@ if __name__ == "__main__":
         "--input-size",
         type=int,
         default=28,
+        nargs="+",
         help="Size of the input image for export and eval mode",
     )
 
@@ -74,6 +74,20 @@ if __name__ == "__main__":
         help="Number of classes for the classifier model",
     )
 
+    parser.add_argument(
+        "--dataset-name",
+        type=str,
+        default="mnist",
+        help="Name of the dataset for the classifier model",
+    )
+
+    parser.add_argument(
+        "--number-to-generate",
+        type=int,
+        default=5,
+        help="Number of images to generate for Conditional GAN evaluation",
+    )
+
     args = parser.parse_args()
 
     eval_kwargs = {
@@ -83,6 +97,7 @@ if __name__ == "__main__":
         "img_channel": args.img_channel,
         "input_size": args.input_size,
         "num_classes": args.num_classes,
+        "number_to_generate": args.number_to_generate,
     }
 
     if args.mode == "eval":
@@ -100,14 +115,12 @@ if __name__ == "__main__":
             raise ValueError(f"Model {args.model} not supported for evaluation")
 
     elif args.mode == "train":
-
         initialize(config_path="src/config/training_configs", version_base=None)
         config_name = f"{args.model}"
         cfg = compose(config_name=config_name)
         GAN_Lightning(cfg)
 
     elif args.mode == "export":
-
         export_model(
             args.model,
             args.ckpt_path[0],
@@ -115,4 +128,5 @@ if __name__ == "__main__":
             img_channel=args.img_channel,
             input_size=args.input_size,
             num_classes=args.num_classes,
+            dataset_name=args.dataset_name,
         )

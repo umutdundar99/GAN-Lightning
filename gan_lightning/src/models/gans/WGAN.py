@@ -110,9 +110,13 @@ class WGAN(LightningModule):
         losses: Dict[str, Any],
     ):
         self.set_attributes(training_config)
-        self.G = DeepConv_Generator(input_dim=self.input_dim, hidden_dim=64, **{"input_size": self.input_size})
+        self.G = DeepConv_Generator(
+            input_dim=self.input_dim, hidden_dim=64, **{"input_size": self.input_size}
+        )
         self.G.weight_init(training_config["weight_init_name"])
-        self.D = DeepConv_Discriminator(hidden_dim=128, **{"input_size": self.input_size})
+        self.D = DeepConv_Discriminator(
+            hidden_dim=128, **{"input_size": self.input_size}
+        )
         self.D.weight_init(training_config["weight_init_name"])
         self.D_train_freq = 5
         self.optimizer_dict = optimizer_dict

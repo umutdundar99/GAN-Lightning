@@ -1,12 +1,14 @@
 import cv2
 import os
-import onnxruntime
+import matplotlib.pyplot as plt
 import torch
+import onnxruntime
 import numpy as np
 
 
-def create_noise(num_samples: int, input_dim: int, device: str = "cuda"):
-    noise = torch.randn(num_samples, input_dim).to(device)
+def create_noise(num_samples: int, input_dim: int, seed):
+    torch.random.manual_seed(seed)
+    noise = torch.randn(num_samples, input_dim)
     return noise
 
 
@@ -30,7 +32,6 @@ def save_images(image: np.ndarray, path: str, step: int):
 
 
 def eval_controllable(**kwargs: dict):
-
     ckpt_paths = kwargs["ckpt_path"]
     num_classes = kwargs["num_classes"]
     input_dim = kwargs["input_dim"]
@@ -86,17 +87,30 @@ def eval_controllable(**kwargs: dict):
             save_images(generated_image, os.path.join(save_path, feature), i)
 
 
-def eval_deepconv(onnx_path: str, input_dim: int = 128):
-    infer = onnxruntime.InferenceSession(onnx_path)
+def eval_deepconv(onnx_path: str, input_dim: int = 128, **kwargs: dict):
+    save_path = "eval_results"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    infer = onnxruntime.InferenceSession(onnx_path[0])
     input_name = infer.get_inputs()[0].name
     output_name = infer.get_outputs()[0].name
-    noise = create_noise(1, input_dim).cpu().numpy()
-    noise = noise.astype(np.float32)
 
-    output = infer.run([output_name], {input_name: noise})
-    output = np.transpose(output[0], (0, 2, 3, 1))
-    cv2.imwrite("result.png", output[0] * 255)
-    print("Inference completed")
+    # infer 20 images and save in a plot
+    noise = create_noise(20, input_dim, 42).cpu().numpy()
+    noise = noise.astype(np.float32)
+    _, ax = plt.subplots(4, 5, figsize=(20, 20))
+    seed = 0
+    for i in range(4):
+        for j in range(5):
+            _noise = noise[seed]
+            _noise = _noise.reshape(1, input_dim)
+            output = infer.run([output_name], {input_name: _noise})
+            output = np.transpose(output[0], (0, 2, 3, 1))
+            output = (output + 1) / 2
+            ax[i, j].imshow(output[0])
+            ax[i, j].axis("off")
+            seed += 1
+    plt.savefig(f"eval_results/{onnx_path[0].split('/')[-1].split('.')[0]}.png")
 
 
 def eval_simple(ckpt_path: str, num_samples: int = 25):
@@ -107,5 +121,35 @@ def eval_w(ckpt_path: str, num_samples: int = 25):
     pass
 
 
-def eval_conditional(ckpt_path: str, num_samples: int = 25):
-    pass
+def eval_conditional(
+    onnx_path: str, input_dim: int = 128, number_to_generate: int = 5, **kwargs: dict
+):
+    # number must be between 0-9
+    assert number_to_generate in range(10)
+    save_path = "eval_results"
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    infer = onnxruntime.InferenceSession(onnx_path[0])
+    input_name = infer.get_inputs()[0].name
+    output_name = infer.get_outputs()[0].name
+
+    # infer 20 images and save in a plot
+    noise = create_noise(20, input_dim, 42).cpu().numpy()
+    # create one hot labels for 8
+    one_hot_labels = np.eye(10)[np.array([number_to_generate] * 20)]
+    noise = np.concatenate((noise, one_hot_labels), axis=1)
+    input_dim += kwargs["num_classes"]
+    noise = noise.astype(np.float32)
+    _, ax = plt.subplots(4, 5, figsize=(20, 20))
+    seed = 0
+    for i in range(4):
+        for j in range(5):
+            _noise = noise[seed]
+            _noise = _noise.reshape(1, input_dim)
+            output = infer.run([output_name], {input_name: _noise})
+            output = np.transpose(output[0], (0, 2, 3, 1))
+            output = (output + 1) / 2
+            ax[i, j].imshow(output[0])
+            ax[i, j].axis("off")
+            seed += 1
+    plt.savefig(f"eval_results/{onnx_path[0].split('/')[-1].split('.')[0]}.png")

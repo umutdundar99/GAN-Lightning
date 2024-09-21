@@ -31,7 +31,7 @@ class Controllable_Classifier(LightningModule):
         )
 
         self.num_classes = num_classes
-        self.classifier_head = ClassificationHead(hidden_dim *3, num_classes)
+        self.classifier_head = ClassificationHead(hidden_dim * 3, num_classes)
 
         if mode == "train":
             self.set_attributes(training_config)
@@ -49,7 +49,6 @@ class Controllable_Classifier(LightningModule):
         return class_pred
 
     def training_step(self, batch: List[torch.Tensor], batch_idx: int):
-
         X, y = batch
         X = X.to(self.device)
         labels = y.to(self.device).float()
@@ -86,7 +85,6 @@ class Controllable_Classifier(LightningModule):
         return val_loss
 
     def validation_epoch_end(self, outputs):
-
         self.logger.experiment.log_metric(
             run_id=self.logger.run_id,
             key="val_multi_label_accuracy",
@@ -111,9 +109,7 @@ class Controllable_Classifier(LightningModule):
         for key, value in config.items():
             setattr(self, key, value)
 
-
     def weight_init(self, mode):
-
         if mode == "kaiming":
             for m in self.modules():
                 if isinstance(m, (nn.Conv2d, nn.Linear)):
@@ -141,7 +137,7 @@ class Controllable_Classifier(LightningModule):
                     nn.init.constant_(m.bias, 0)
 
         else:
-            raise ValueError(f"Unknown weight initialization")
+            raise ValueError("Unknown weight initialization")
 
     def multi_label_accuracy(self, y_true, y_pred, threshold=0.5):
         # apply sigmoid preds to get binary predictions
@@ -156,9 +152,6 @@ class Controllable_Classifier(LightningModule):
 
 
 if __name__ == "__main__":
-
-    import onnx
-    import onnxruntime
     import torch.onnx
     from gan_lightning.src.models.generators.deepconv_generator import (
         DeepConv_Generator,

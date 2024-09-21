@@ -29,8 +29,15 @@ class ConditionalGAN(LightningModule):
         **kwargs,
     ):
         super().__init__()
+
+        self.dataset_config = dataset_config
+        self.losses = losses
+        self.optimizer_dict = optimizer_dict
+        self.training_config = training_config
+        self.mode = mode
+
         if mode == "train":
-            self._init_training(training_config, optimizer_dict, dataset_config, losses)
+            self._init_training()
         elif mode == "eval":
             self._init_eval(
                 kwargs["input_dim"], kwargs["img_channel"], kwargs["input_size"]
@@ -126,34 +133,32 @@ class ConditionalGAN(LightningModule):
 
         return generator_input_dim, discriminator_im_chan
 
-    def _init_training(
-        self,
-        training_config: Dict[str, Any],
-        optimizer_dict: Dict[str, Any],
-        dataset_config: Dict[str, Any],
-        losses: Dict[str, Any],
-    ):
-        self.set_attributes(training_config)
+    def _init_training(self):
+        self.set_attributes(self.training_config)
         constants = Constants()
-        img_channel = getattr(constants.IMG_CHANNEL, dataset_config["name"].upper())
+        img_channel = getattr(
+            constants.IMG_CHANNEL, self.dataset_config["name"].upper()
+        )
         self.num_classes = getattr(
-            constants.NUM_CLASSES, dataset_config["name"].upper()
+            constants.NUM_CLASSES, self.dataset_config["name"].upper()
         )
         _input_dim, self.img_channel = self.set_input_dim(
             self.input_dim, img_channel, self.num_classes
         )
-        self.G = DeepConv_Generator(input_dim=_input_dim, **{"input_size": self.input_size})
-        self.G.weight_init(training_config["weight_init_name"])
-        self.D = DeepConv_Discriminator(
-            img_channel=self.img_channel,**{"input_size": self.input_size}
+        self.G = DeepConv_Generator(
+            input_dim=_input_dim, **{"input_size": self.input_size}
         )
-        self.D.weight_init(training_config["weight_init_name"])
-        self.optimizer_dict = optimizer_dict
-        self.discriminator_loss = losses.get("discriminator_loss", None)
+        self.G.weight_init(self.training_config["weight_init_name"])
+        self.D = DeepConv_Discriminator(
+            img_channel=self.img_channel, **{"input_size": self.input_size}
+        )
+        self.D.weight_init(self.training_config["weight_init_name"])
+        self.optimizer_dict = self.optimizer_dict
+        self.discriminator_loss = self.losses.get("discriminator_loss", None)
         self.d_loss = self.discriminator_loss()
-        self.generator_loss = losses.get("generator_loss", None)
+        self.generator_loss = self.losses.get("generator_loss", None)
         self.g_loss = self.generator_loss()
-        self.batcch_size = dataset_config.get("batch_size", 128)
+        self.batcch_size = self.dataset_config.get("batch_size", 128)
         self.automatic_optimization = False
 
     def _init_eval(self, input_dim: int, img_channel: int, input_size: int):

@@ -15,9 +15,8 @@ def export_model(
     num_classes: Optional[int] = 40,
     dataset_name: str = "mnist",
     save_dir: str = "gan_lightning/onnxes",
-    
 ):
-    
+    input_dim = input_dim + num_classes if num_classes is not None else input_dim
     export_kwargs = {
         "input_dim": input_dim,
         "img_channel": img_channel,
@@ -46,7 +45,7 @@ def export_model(
     )
 
     # simplify onnx model
-    onnx_model = onnx.load(f"{model_name}.onnx")
+    onnx_model = onnx.load(f"{save_dir}/{dataset_name}-{model_name}.onnx")
     simplified_model, check = simplify(onnx_model)
     assert check, "Simplified ONNX model could not be validated"
     onnx.save(simplified_model, f"{save_dir}/{dataset_name}-{model_name}.onnx")

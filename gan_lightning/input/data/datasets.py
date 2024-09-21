@@ -11,7 +11,6 @@ class CelebaDataset(Dataset):
     def __init__(
         self, annotations_file, img_dir, transform=None, subset=None, input_size=128
     ):
-
         self.img_dir = img_dir
         self.transform = transform
         self.input_size = input_size
@@ -29,13 +28,11 @@ class CelebaDataset(Dataset):
             self.image_files = self.image_files[:2000]
             self.attributes = self.attributes.iloc[:2000]
         print(f"Lenght of {subset} dataset: {len(self.image_files)}")
-        
 
     def __len__(self):
         return len(self.image_files)
 
     def __getitem__(self, idx):
-
         img_path = os.path.join(self.img_dir, self.image_files[idx])
         image = cv2.imread(img_path)
         image = cv2.resize(image, self.input_size)
